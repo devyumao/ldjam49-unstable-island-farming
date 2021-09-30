@@ -18,10 +18,11 @@
         "url": "https://github.com/photonstorm/phaser3-typescript-project-template/issues"
     },
     "homepage": "https://github.com/photonstorm/phaser3-typescript-project-template#readme",
-    "dependencies": {},
+    "dependencies": {
+        "phaser": "^3.55.2"
+    },
     "devDependencies": {
         "@rollup/plugin-replace": "^2.3.4",
-        "phaser": "^3.55.0",
         "rollup": "^2.35.1",
         "rollup-plugin-commonjs": "^10.1.0",
         "rollup-plugin-node-resolve": "^5.2.0",
