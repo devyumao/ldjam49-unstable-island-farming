@@ -11,3 +11,5 @@ node_modules/
 
 # Build
 /npm-debug.log
+dist/game.js
+dist/game.js.map
