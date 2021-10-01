@@ -36,12 +36,16 @@ export default class Demo extends Phaser.Scene
     }
 }
 
-const config = {
+const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
-    backgroundColor: '#125555',
+    backgroundColor: '#000000',
     width: 800,
     height: 600,
-    scene: Demo
+    scene: Demo,
+    scale: {
+        mode: Phaser.Scale.ScaleModes.FIT,
+        autoCenter: Phaser.Scale.Center.CENTER_BOTH
+    }
 };
 
 const game = new Phaser.Game(config);
