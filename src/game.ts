@@ -1,5 +1,7 @@
 import 'phaser';
 
+import ActionBadge from './ActionBadge';
+
 
 const TILE_SIZE = 32;
 const COLLISION_TILES = [
@@ -12,11 +14,32 @@ const COLLISION_TILES = [
     36, 37, 38, 39, 40, 41
 ];
 
+
+enum ActionKey {
+    pow = 'pow',
+    sow = 'sow',
+    water = 'water',
+    reap = 'reap'
+}
+
+const rhythm = {
+    bps: 72,
+    sequence: [
+        { key: ActionKey.pow, start: 5 },
+        { key: ActionKey.sow, start: 9 },
+        { key: ActionKey.water, start: 13 },
+        { key: ActionKey.reap, start: 17 }
+    ]
+};
+
+
+
 export default class Demo extends Phaser.Scene {
     map: Phaser.Tilemaps.Tilemap;
     layer: Phaser.Tilemaps.TilemapLayer;
     hero: Phaser.GameObjects.Sprite;
     cursors: Phaser.Types.Input.Keyboard.CursorKeys;
+    actionBadges: Phaser.GameObjects.Group;
 
     constructor() {
         super('demo');
@@ -31,6 +54,8 @@ export default class Demo extends Phaser.Scene {
         this.initMap();
         this.initHero();
         this.initInput();
+        this.initRhythmBoard();
+
         // this.renderDebug();
     }
 
@@ -99,6 +124,57 @@ export default class Demo extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
     }
 
+    initRhythmBoard() {
+        const background =  this.add.rectangle(
+            this.scale.width / 2, 680,
+            800, 80,
+            0xffffff, 0.75
+        );
+
+        const actionBadges = this.add.group({
+            classType: ActionBadge,
+            maxSize: 10,
+            runChildUpdate: true
+        });
+        this.actionBadges = actionBadges;
+
+        const shape = this.make.graphics({});
+        shape.fillStyle(0xffffff);
+        shape.beginPath();
+        shape.fillRect(
+            this.scale.width / 2 - background.width / 2,
+            background.y - background.height / 2,
+            background.width, background.height
+        )
+        const mask = shape.createGeometryMask();
+        background.setMask(mask);
+
+        const scaleWidth = this.scale.width;
+        const createActionBadge = () => {
+            const badge: ActionBadge = actionBadges.get(
+                // this.scale.width / 2 + v * (2 * 6e4 / rhythm.bps),
+                scaleWidth / 2 + background.width / 2,
+                background.y,
+                'tiles'
+            );
+            badge.setActive(true);
+            badge.setMask(mask);
+        }
+        createActionBadge();
+        this.time.addEvent({
+            delay: 6e4 / rhythm.bps * 2,
+            callback: () => { createActionBadge(); },
+            callbackScope: this,
+            loop: true
+        });
+
+        const pointer = this.add.rectangle(
+            this.scale.width / 2, 680,
+            10, 90,
+            0x000000, 0.5
+        );
+    }
+
     update(time, delta) {
         const { input, cursors, hero } = this;
 
@@ -119,6 +195,31 @@ export default class Demo extends Phaser.Scene {
         ) {
             hero.setY(hero.y + TILE_SIZE * 2);
         }
+
+        if (input.keyboard.checkDown(cursors.space, 100)) {
+            const badge = this.getAvailableActionBadge();
+            if (badge) {
+                badge.setData('hit', true);
+            }
+        }
+    }
+
+    getAvailableActionBadge() {
+        return this.actionBadges.children.getArray().reduce((prev: ActionBadge | null, curr: ActionBadge) => {
+            if (curr.getData('hit')) {
+                return prev;
+            }
+            const currDistance = Math.abs(curr.x - this.scale.width / 2);
+            if (currDistance > ActionBadge.MAX_HIT_DISTANCE) {
+                return prev;
+            }
+            if (!prev) {
+                return curr;
+            }
+            return (currDistance < Math.abs(prev.x - this.scale.width / 2))
+                ? curr
+                : prev;
+        }, null) as (ActionBadge | null);
     }
 
     isBlockedByLayer(x: number, y: number) {
