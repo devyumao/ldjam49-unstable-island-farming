@@ -9,4 +9,3 @@ export default class ActionBadge extends Phaser.GameObjects.Image {
         }
     }
 }
-

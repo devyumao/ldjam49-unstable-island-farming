@@ -1,9 +1,11 @@
 import 'phaser';
 
 import ActionBadge from './ActionBadge';
+import { TILE_SIZE } from './constant';
+import GridManager from './GridManager';
+import Hero from './Hero';
 
 
-const TILE_SIZE = 32;
 const COLLISION_TILES = [
     0, 1, 2, 3, 4, 5,
     6, 11,
@@ -14,21 +16,20 @@ const COLLISION_TILES = [
     36, 37, 38, 39, 40, 41
 ];
 
-
 enum ActionKey {
-    pow = 'pow',
-    sow = 'sow',
-    water = 'water',
-    reap = 'reap'
+    Pow = 'plow',
+    Sow = 'sow',
+    Water = 'water',
+    Reap = 'reap'
 }
 
 const rhythm = {
     bps: 72,
     sequence: [
-        { key: ActionKey.pow, start: 5 },
-        { key: ActionKey.sow, start: 9 },
-        { key: ActionKey.water, start: 13 },
-        { key: ActionKey.reap, start: 17 }
+        { key: ActionKey.Pow, start: 5 },
+        { key: ActionKey.Sow, start: 9 },
+        { key: ActionKey.Water, start: 13 },
+        { key: ActionKey.Reap, start: 17 }
     ]
 };
 
@@ -37,9 +38,10 @@ const rhythm = {
 export default class Demo extends Phaser.Scene {
     map: Phaser.Tilemaps.Tilemap;
     layer: Phaser.Tilemaps.TilemapLayer;
-    hero: Phaser.GameObjects.Sprite;
+    hero: Hero;
     cursors: Phaser.Types.Input.Keyboard.CursorKeys;
     actionBadges: Phaser.GameObjects.Group;
+    gridManager: GridManager;
 
     constructor() {
         super('demo');
@@ -48,11 +50,21 @@ export default class Demo extends Phaser.Scene {
     preload() {
         this.load.image('tiles', 'assets/island-tiles-8.png');
         this.load.spritesheet('hero', 'assets/hero.png', { frameWidth: 16, frameHeight: 32 });
+        this.load.spritesheet('soil', 'assets/island-tiles-8.png', { frameWidth: 16, frameHeight: 16, margin: 8 });
+        this.load.spritesheet('carrot', 'assets/carrot.png', { frameWidth: 16, frameHeight: 32 });
     }
 
     create() {
         this.initMap();
-        this.initHero();
+
+        this.gridManager = new GridManager(this);
+        this.gridManager.initIslandGrids({ x: 0, y: 0 });
+
+        this.hero = new Hero(this, {
+            islandCoord: { x: 0, y: 0 },
+            coord: { x: 1, y: 1 }
+        });
+
         this.initInput();
         this.initRhythmBoard();
 
@@ -101,23 +113,6 @@ export default class Demo extends Phaser.Scene {
         layer.randomize(2, 7, 4, 1, [32, 33]);
         layer.randomize(0, 2, 1, 4, [12, 18]);
         layer.randomize(2, 8, 4, 1, [38, 39]);
-    }
-
-    initHero() {
-        const hero = this.add.sprite(TILE_SIZE * 8 / 2, TILE_SIZE * 8 / 2 + TILE_SIZE, 'hero')
-        hero.setOrigin(0.5, 1);
-        hero.setScale(4);
-        this.hero = hero;
-        
-        const { anims } = hero;
-        anims.create({
-            key: 'idle',
-            frames: anims.generateFrameNumbers('hero', { frames: [0, 1] }),
-            frameRate: 3,
-            repeat: -1
-        })
-
-        hero.play('idle');
     }
 
     initInput() {
@@ -181,25 +176,30 @@ export default class Demo extends Phaser.Scene {
         if (input.keyboard.checkDown(cursors.left, 200)
             && !this.isBlockedByLayer(hero.x - TILE_SIZE * 2, hero.y)
         ) {
-            hero.setX(hero.x - TILE_SIZE * 2);
+            hero.goLeft();
         } else if (input.keyboard.checkDown(cursors.right, 200)
             && !this.isBlockedByLayer(hero.x + TILE_SIZE * 2, hero.y)
         ) {
-            hero.setX(hero.x + TILE_SIZE * 2);
+            hero.goRight();
         } else if (input.keyboard.checkDown(cursors.up, 200)
             && !this.isBlockedByLayer(hero.x, hero.y - TILE_SIZE * 2)
         ) {
-            hero.setY(hero.y - TILE_SIZE * 2);
+            hero.goUp();
         } else if (input.keyboard.checkDown(cursors.down, 200)
             && !this.isBlockedByLayer(hero.x, hero.y + TILE_SIZE * 2)
         ) {
-            hero.setY(hero.y + TILE_SIZE * 2);
+            hero.goDown();
         }
 
         if (input.keyboard.checkDown(cursors.space, 100)) {
             const badge = this.getAvailableActionBadge();
             if (badge) {
                 badge.setData('hit', true);
+            }
+            
+            const grid = this.gridManager.get(hero.islandCoord, hero.coord);
+            if (grid) {
+                grid.interact();
             }
         }
     }
