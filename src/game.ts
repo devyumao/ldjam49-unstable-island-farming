@@ -57,7 +57,7 @@ export default class Demo extends Phaser.Scene {
 
         SoundEffects.names
             .forEach(name => {
-                this.load.audio(name, `assets/audio/${name}.wav`);
+                this.load.audio(name, `assets/audio/${name}.mp3`);
             });
     }
 

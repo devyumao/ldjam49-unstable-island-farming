@@ -1,8 +1,12 @@
-export type SoundEffectName = 'jump';
+export type SoundEffectName = 'ahhh' | 'applause' | 'error' | 'jump' | 'plow'
+    | 'sow' | 'water' | 'wow' | 'yeah';
 
 export class SoundEffects {
 
-    static names: SoundEffectName[] = [];
+    static names: SoundEffectName[] = [
+        'ahhh', 'applause', 'error', 'jump', 'plow',
+        'sow', 'water', 'wow', 'yeah'
+    ];
 
     protected _sounds: Object;
 
