@@ -1,7 +1,7 @@
 import { GRID_PER_ISLAND_SIDE, GRID_SIZE, HERO_BASE_DEPTH, ISLAND_INNER_SIZE, SoilState } from './constant';
 import Grid from './Grid';
 
-const HERO_MOVE_DURATION = 200;
+const HERO_MOVE_DURATION = 150;
 
 export default class Hero extends Phaser.GameObjects.Sprite {
     islandCoord: ICoord;
@@ -205,7 +205,7 @@ export default class Hero extends Phaser.GameObjects.Sprite {
         const { onComplete, ...otherConfig } = config;
         this.scene.tweens.add({
             targets: this,
-            duration: 100,
+            duration: HERO_MOVE_DURATION,
             ease: 'Quad.easeInOut',
             onStart: () => {
                 this.jump();
