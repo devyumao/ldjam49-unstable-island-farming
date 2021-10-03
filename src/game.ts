@@ -117,11 +117,11 @@ export default class Demo extends Phaser.Scene {
             });
         });
 
-        layer.randomize(2, 0, 4, 1, [2, 3]);
-        layer.randomize(7, 2, 1, 4, [17, 23]);
-        layer.randomize(2, 7, 4, 1, [32, 33]);
-        layer.randomize(0, 2, 1, 4, [12, 18]);
-        layer.randomize(2, 8, 4, 1, [38, 39]);
+        layer.randomize(2, 0, 4, 1, [2, 3, 50]);
+        layer.randomize(7, 2, 1, 4, [17, 23, 28]);
+        layer.randomize(2, 7, 4, 1, [32, 33, 46]);
+        layer.randomize(0, 2, 1, 4, [12, 18, 22]);
+        layer.randomize(2, 8, 4, 1, [38, 39, 52]);
     }
 
     initInput() {
