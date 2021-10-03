@@ -191,7 +191,7 @@ export default class Demo extends Phaser.Scene {
             hero.goDown();
         }
 
-        if (input.keyboard.checkDown(cursors.space, 100)) {
+        if (input.keyboard.checkDown(cursors.space, 500)) {
             const badge = this.getAvailableActionBadge();
             if (badge) {
                 badge.setData('hit', true);
@@ -199,7 +199,10 @@ export default class Demo extends Phaser.Scene {
             
             const grid = this.gridManager.get(hero.islandCoord, hero.coord);
             if (grid) {
-                grid.interact();
+                hero.interact(grid)
+                    .then(() => {
+                        grid.beInteracted();
+                    });
             }
         }
     }

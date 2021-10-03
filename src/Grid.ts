@@ -1,10 +1,4 @@
-import { GRID_PER_ISLAND_SIDE, GRID_SIZE, ISLAND_INNER_SIZE } from './constant';
-
-enum SoilState {
-    Virgin,
-    Plowed,
-    Watered
-}
+import { GRID_PER_ISLAND_SIDE, GRID_SIZE, ISLAND_INNER_SIZE, PLANT_BASE_DEPTH, SoilState } from './constant';
 
 const SOIL_STATE_FRAME = {
     [SoilState.Virgin]: 0,
@@ -21,7 +15,7 @@ const PLANT_MATURE_AGE = {
 };
 
 const PLAT_AGE_DURATION = {
-    [PlantType.Carrot]: 1e3
+    [PlantType.Carrot]: 100
 };
 
 export default class Grid {
@@ -67,14 +61,14 @@ export default class Grid {
             .setAlpha(0)
             .setScale(4)
             .setOrigin(0.5, 0.75)
-            .setDepth(1000 + (GRID_PER_ISLAND_SIDE * islandCoord.y + coord.y) * 2);
+            .setDepth(PLANT_BASE_DEPTH + (GRID_PER_ISLAND_SIDE * islandCoord.y + coord.y) * 2);
     }
  
     // interact({ seed }: { seed?: PlantType }) {
     //     this.changeSoilState();
     // }
 
-    interact() {
+    beInteracted() {
         switch (this.soilState) {
             case SoilState.Virgin:
                 this.bePlowed();
@@ -83,7 +77,7 @@ export default class Grid {
                 this.beWatered();
                 break;
             case SoilState.Watered:
-                if (this.hasPlant()) {
+                if (!this.hasPlant()) {
                     this.beSowed();
                 } else if (this.isMature()) {
                     this.beReaped();
@@ -114,22 +108,37 @@ export default class Grid {
     }
 
     beReaped() {
-        this.plant.setFrame(this.plantAge);
         this.setPlantAge(PLANT_MATURE_AGE[this.plantType] + 1)
 
-        this.scene.tweens.add({
-            targets: this.plant,
-            duration: 500,
-            props: {
-                alpha: 0,
-                y: this.plant.y - 30
-            },
-            onComplete: () => {
-                this.setSoilState(SoilState.Plowed);
-                this.plant.y += 30;
-                this.plantAge = -1;
-            },
-            callbackScope: this
+        this.scene.tweens.timeline({
+            tweens: [
+                {
+                    targets: this.plant,
+                    duration: 80,
+                    props: {
+                        alpha: 1,
+                        y: this.plant.y - 50
+                    },
+                    onStart: () => {
+                        this.plant.setAlpha(0);
+                    },
+                    callbackScope: this
+                },
+                {
+                    targets: this.plant,
+                    duration: 80,
+                    delay: 400,
+                    props: {
+                        alpha: 0
+                    },
+                    onComplete: () => {
+                        this.setSoilState(SoilState.Plowed);
+                        this.plant.y += 50;
+                        this.plantAge = -1;
+                    },
+                    callbackScope: this
+                }
+            ]
         });
     }
 
@@ -138,7 +147,7 @@ export default class Grid {
     }
 
     hasPlant() {
-        return this.plantAge === -1;
+        return this.plantAge !== -1;
     }
 
     private setSoilState(state: SoilState) {

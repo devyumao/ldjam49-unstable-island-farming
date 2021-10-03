@@ -6,3 +6,9 @@ export const GRID_PER_ISLAND_SIDE = 3;
 
 export const HERO_BASE_DEPTH = 999;
 export const PLANT_BASE_DEPTH = 1000;
+
+export enum SoilState {
+    Virgin,
+    Plowed,
+    Watered
+}
