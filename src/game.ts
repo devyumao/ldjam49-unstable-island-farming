@@ -3,6 +3,7 @@ import 'phaser';
 import ActionBadge from './ActionBadge';
 import { TILE_SIZE } from './constant';
 import GridManager from './GridManager';
+import { SoundEffects } from './SoundEffect';
 import Hero from './Hero';
 
 
@@ -42,6 +43,7 @@ export default class Demo extends Phaser.Scene {
     cursors: Phaser.Types.Input.Keyboard.CursorKeys;
     actionBadges: Phaser.GameObjects.Group;
     gridManager: GridManager;
+    soundEffects: SoundEffects;
 
     constructor() {
         super('demo');
@@ -52,6 +54,11 @@ export default class Demo extends Phaser.Scene {
         this.load.spritesheet('hero', 'assets/hero.png', { frameWidth: 16, frameHeight: 32 });
         this.load.spritesheet('soil', 'assets/island-tiles-8.png', { frameWidth: 16, frameHeight: 16, margin: 8 });
         this.load.spritesheet('carrot', 'assets/carrot.png', { frameWidth: 16, frameHeight: 32 });
+
+        SoundEffects.names
+            .forEach(name => {
+                this.load.audio(name, `assets/audio/${name}.wav`);
+            });
     }
 
     create() {
@@ -60,7 +67,9 @@ export default class Demo extends Phaser.Scene {
         this.gridManager = new GridManager(this);
         this.gridManager.initIslandGrids({ x: 0, y: 0 });
 
-        this.hero = new Hero(this, {
+        this.soundEffects = new SoundEffects(this.sound);
+
+        this.hero = new Hero(this, this.soundEffects, {
             islandCoord: { x: 0, y: 0 },
             coord: { x: 1, y: 1 }
         });
@@ -196,7 +205,7 @@ export default class Demo extends Phaser.Scene {
             if (badge) {
                 badge.setData('hit', true);
             }
-            
+
             const grid = this.gridManager.get(hero.islandCoord, hero.coord);
             if (grid) {
                 hero.interact(grid)

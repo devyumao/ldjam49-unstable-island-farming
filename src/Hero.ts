@@ -1,5 +1,6 @@
 import { GRID_PER_ISLAND_SIDE, GRID_SIZE, HERO_BASE_DEPTH, ISLAND_INNER_SIZE, SoilState } from './constant';
 import Grid from './Grid';
+import { SoundEffects } from './SoundEffect';
 
 const HERO_MOVE_DURATION = 150;
 
@@ -9,6 +10,7 @@ export default class Hero extends Phaser.GameObjects.Sprite {
 
     constructor(
         scene: Phaser.Scene,
+        protected soundEffects: SoundEffects,
         { islandCoord, coord }: { islandCoord: ICoord, coord: ICoord }
     ) {
         super(
@@ -109,7 +111,8 @@ export default class Hero extends Phaser.GameObjects.Sprite {
     }
 
     private jump() {
-        return this.play({ key: 'jump' })
+        this.soundEffects.play('jump');
+        return this.play({ key: 'jump' });
     }
 
     private do({
@@ -164,7 +167,7 @@ export default class Hero extends Phaser.GameObjects.Sprite {
                     this.coord.x = 0;
                 }
             }
-        });        
+        });
     }
 
     goUp() {
@@ -184,7 +187,7 @@ export default class Hero extends Phaser.GameObjects.Sprite {
         });
     }
 
-    goDown() {        
+    goDown() {
         this.go({
             props: {
                 y: this.y + GRID_SIZE
