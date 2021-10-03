@@ -17,7 +17,7 @@ export class SoundEffects {
         this._sounds = {};
         SoundEffects.names.forEach(name => {
             this._sounds[name] = sound.add(name, {
-                volume: 0.5
+                volume: 0.7
             });
         });
     }
