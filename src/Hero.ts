@@ -37,8 +37,8 @@ export default class Hero extends Phaser.GameObjects.Sprite {
         });
         anims.create({
             key: 'jump',
-            frames: anims.generateFrameNumbers('hero', { frames: [2, 3, 4, 5, 6, 7, 8, 9, 1] }),
-            frameRate: 9e3 / HERO_MOVE_DURATION,
+            frames: anims.generateFrameNumbers('hero', { frames: [3, 4, 5, 5, 6, 6, 7, 8] }),
+            frameRate: 8e3 / HERO_MOVE_DURATION,
             repeat: 0
         });
         anims.create({
