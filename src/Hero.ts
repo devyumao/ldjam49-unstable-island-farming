@@ -38,9 +38,9 @@ export default class Hero extends Phaser.GameObjects.Sprite {
     goLeft() {
         this.x -= GRID_SIZE;
         if (this.coord.x > 0) {
-            this.coord.x -= 1;
+            this.coord.x--;
         } else {
-            this.islandCoord.x -= 1;
+            this.islandCoord.x--;
             this.coord.x = GRID_PER_ISLAND_SIDE - 1;
         }
     }
@@ -48,9 +48,9 @@ export default class Hero extends Phaser.GameObjects.Sprite {
     goRight() {
         this.x += GRID_SIZE;
         if (this.coord.x < GRID_PER_ISLAND_SIDE - 1) {
-            this.coord.x += 1;
+            this.coord.x++;
         } else {
-            this.islandCoord.x += 1;
+            this.islandCoord.x++;
             this.coord.x = 0;
         }
     }
@@ -58,9 +58,9 @@ export default class Hero extends Phaser.GameObjects.Sprite {
     goUp() {
         this.y -= GRID_SIZE;
         if (this.coord.y > 0) {
-            this.coord.y -= 1;
+            this.coord.y--;
         } else {
-            this.islandCoord.y -= 1;
+            this.islandCoord.y--;
             this.coord.y = GRID_PER_ISLAND_SIDE - 1;
         }
     }
@@ -68,9 +68,9 @@ export default class Hero extends Phaser.GameObjects.Sprite {
     goDown() {
         this.y += GRID_SIZE;
         if (this.coord.y < GRID_PER_ISLAND_SIDE - 1) {
-            this.coord.y += 1;
+            this.coord.y++;
         } else {
-            this.islandCoord.y += 1;
+            this.islandCoord.y++;
             this.coord.y = 0;
         }
     }
