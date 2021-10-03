@@ -1,4 +1,4 @@
-import { GRID_PER_ISLAND_SIDE, GRID_SIZE, ISLAND_INNER_SIZE } from './constant';
+import { GRID_PER_ISLAND_SIDE, GRID_SIZE, HERO_BASE_DEPTH, ISLAND_INNER_SIZE } from './constant';
 
 export default class Hero extends Phaser.GameObjects.Sprite {
     islandCoord: ICoord;
@@ -17,8 +17,10 @@ export default class Hero extends Phaser.GameObjects.Sprite {
         scene.add.existing(this);
         this.islandCoord = islandCoord;
         this.coord = coord;
-        this.setOrigin(0.5, 0.8);
-        this.setScale(4);
+        this
+            .setOrigin(0.6, 1)
+            .setScale(4)
+            .setDepth(HERO_BASE_DEPTH + (GRID_PER_ISLAND_SIDE * islandCoord.y + coord.y) * 2);
         this.initAnims();
     }
 
@@ -57,6 +59,7 @@ export default class Hero extends Phaser.GameObjects.Sprite {
 
     goUp() {
         this.y -= GRID_SIZE;
+        this.depth -= 2;
         if (this.coord.y > 0) {
             this.coord.y--;
         } else {
@@ -67,6 +70,7 @@ export default class Hero extends Phaser.GameObjects.Sprite {
 
     goDown() {
         this.y += GRID_SIZE;
+        this.depth += 2;
         if (this.coord.y < GRID_PER_ISLAND_SIDE - 1) {
             this.coord.y++;
         } else {

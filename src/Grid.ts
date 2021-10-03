@@ -1,4 +1,4 @@
-import { GRID_SIZE, ISLAND_INNER_SIZE } from './constant';
+import { GRID_PER_ISLAND_SIDE, GRID_SIZE, ISLAND_INNER_SIZE } from './constant';
 
 enum SoilState {
     Virgin,
@@ -66,7 +66,8 @@ export default class Grid {
         )
             .setAlpha(0)
             .setScale(4)
-            .setOrigin(0.5, 0.75);
+            .setOrigin(0.5, 0.75)
+            .setDepth(1000 + (GRID_PER_ISLAND_SIDE * islandCoord.y + coord.y) * 2);
     }
  
     // interact({ seed }: { seed?: PlantType }) {
