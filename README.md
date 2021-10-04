@@ -4,7 +4,7 @@
 
 [Yumao](https://github.com/devyumao) and [Ovilia](https://github.com/Ovilia)'s entry for [Ludum Dare 49](https://ldjam.com/events/ludum-dare/49).
 
-[Play!]()
+[Play!](https://devyumao.github.io/ldjam49-unstable-island-farming/index.html)
 
 Goal: Grow 40 carrots on the unstable island.
 
