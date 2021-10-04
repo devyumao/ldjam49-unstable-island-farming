@@ -132,7 +132,7 @@ export default class Demo extends Phaser.Scene {
                     this.beforeGameImg.destroy();
                     this.beforeGameImg = null;
                 }
-                this.rhythmBoard.play();
+                this.rhythmBoard.start();
                 this.islandManager.animate();
 
                 this.carrotParticles.emitters.getAt(0).start();
@@ -249,7 +249,7 @@ export default class Demo extends Phaser.Scene {
             }
 
             const grid = gridManager.get(hero.islandCoord, hero.coord);
-            if (grid) {
+            if (grid && gameState !== 'before_game') {
                 const avalableActions = grid.getAvailableActions();
                 rhythmBoard.updateBeatsAvailable(avalableActions);
             }
