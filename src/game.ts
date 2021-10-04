@@ -24,6 +24,7 @@ export default class Demo extends Phaser.Scene {
     islandManager: IslandManager
     hero: Hero;
     cursors: Phaser.Types.Input.Keyboard.CursorKeys;
+    keyEnter: Phaser.Input.Keyboard.Key;
     gridManager: GridManager;
     rhythmBoard: RhythmBoard;
     soundEffects: SoundEffects;
@@ -122,6 +123,7 @@ export default class Demo extends Phaser.Scene {
 
     initInput() {
         this.cursors = this.input.keyboard.createCursorKeys();
+        this.keyEnter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
     }
 
     setGameState(state: GameState) {
@@ -295,16 +297,9 @@ export default class Demo extends Phaser.Scene {
                 const avalableActions = grid.getAvailableActions();
                 rhythmBoard.updateBeatsAvailable(avalableActions);
             }
-
             if (input.keyboard.checkDown(cursors.space, 500)) {
                 if (gameState === 'before_game') {
                     this.setGameState('in_game');
-                    return;
-                }
-                if (gameState === 'win' || gameState === 'lose') {
-                    // this.setGameState('before_game');
-                    // this.scene.restart();
-                    window.location.reload();
                     return;
                 }
                 rhythmBoard.animateHitPoint();
@@ -330,6 +325,13 @@ export default class Demo extends Phaser.Scene {
                         }
                     }
                 }
+            }
+        }
+
+        if (gameState === 'win' || gameState === 'lose') {
+            if (this.keyEnter.isDown) {
+                window.location.reload();
+                return;
             }
         }
     }
