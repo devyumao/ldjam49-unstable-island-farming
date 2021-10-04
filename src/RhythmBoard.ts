@@ -14,7 +14,7 @@ export default class RhythmBoard {
     bps: number;
     sequence: IBeat[];
     beatCount = 0;
-    delayBeats = 8;
+    delayBeats = 16;
     music: Phaser.Sound.BaseSound;
     background: Phaser.GameObjects.Rectangle;
     mask: Phaser.Display.Masks.GeometryMask;
