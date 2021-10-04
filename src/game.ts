@@ -123,6 +123,8 @@ export default class Demo extends Phaser.Scene {
                     this.beforeGameImg.destroy();
                     this.beforeGameImg = null;
                 }
+                this.rhythmBoard.play();
+                this.islandManager.animate();
                 break;
 
             case 'win':
@@ -185,12 +187,6 @@ export default class Demo extends Phaser.Scene {
     update(time, delta) {
         const { input, cursors, hero, rhythmBoard, gridManager, islandManager } = this;
 
-        if (input.keyboard.checkDown(cursors.shift, 1000)) {
-            // TODO: for debug
-            rhythmBoard.play();
-            islandManager.animate();
-        }
-
         if (!hero.busy) {
             if (input.keyboard.checkDown(cursors.left, 500)) {
                 const left = getLeft(hero.islandCoord, hero.coord);
@@ -244,7 +240,7 @@ export default class Demo extends Phaser.Scene {
                                 grid.beInteracted(action);
                             });
                     } else {
-                        
+                        this.cameras.main.shake(200, 0.02);
                     }
                 }
             }
