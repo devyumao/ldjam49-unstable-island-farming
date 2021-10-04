@@ -159,7 +159,7 @@ export default class Hero extends Phaser.GameObjects.Sprite {
     }
 
     goLeft() {
-        this.go({
+        return this.go({
             props: {
                 x: this.x - GRID_SIZE * (this.coord.x > 0 ?  1 : 2)
             },
@@ -172,7 +172,7 @@ export default class Hero extends Phaser.GameObjects.Sprite {
     }
 
     goRight() {
-        this.go({
+        return this.go({
             props: {
                 x: this.x + GRID_SIZE * (this.coord.x < GRID_PER_ISLAND_SIDE - 1 ?  1 : 2)
             },
@@ -185,7 +185,7 @@ export default class Hero extends Phaser.GameObjects.Sprite {
     }
 
     goUp() {
-        this.go({
+        return this.go({
             props: {
                 y: this.y - GRID_SIZE * (this.coord.y > 0 ?  1 : 2)
             },
@@ -199,7 +199,7 @@ export default class Hero extends Phaser.GameObjects.Sprite {
     }
 
     goDown() {
-        this.go({
+        return this.go({
             props: {
                 y: this.y + GRID_SIZE * (this.coord.y < GRID_PER_ISLAND_SIDE - 1 ?  1 : 2)
             },
@@ -214,19 +214,22 @@ export default class Hero extends Phaser.GameObjects.Sprite {
 
     private go(config: any) {
         const { onComplete, ...otherConfig } = config;
-        this.scene.tweens.add({
-            targets: this,
-            duration: HERO_MOVE_DURATION,
-            ease: 'Quad.easeInOut',
-            onStart: () => {
-                this.jump();
-            },
-            onComplete: () => {
-                this.idle();
-                onComplete && onComplete();
-            },
-            callbackScope: this,
-            ...otherConfig
+        return new Promise(resolve => {
+            this.scene.tweens.add({
+                targets: this,
+                duration: HERO_MOVE_DURATION,
+                ease: 'Quad.easeInOut',
+                onStart: () => {
+                    this.jump();
+                },
+                onComplete: () => {
+                    this.idle();
+                    onComplete && onComplete();
+                    resolve(null);
+                },
+                callbackScope: this,
+                ...otherConfig
+            });
         });
     }
 }

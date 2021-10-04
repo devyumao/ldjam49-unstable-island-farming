@@ -42,12 +42,13 @@ export default class RhythmBoard {
             this.scene.scale.width / 2, 680,
             800, 64,
             0xffffff, 0
-        );
+        )
+            .setScrollFactor(0);
     }
 
     private initMask() {
         const { scene, background } = this;
-        const shape = scene.make.graphics({});
+        const shape = scene.make.graphics({}).setScrollFactor(0);
         shape.fillStyle(0xffffff);
         shape.beginPath();
         shape.fillRect(
@@ -65,7 +66,8 @@ export default class RhythmBoard {
             'stave', 8
         )
             .setScale(100, 4)
-            .setAlpha(0.7);
+            .setAlpha(0.7)
+            .setScrollFactor(0);
     }
 
     private initBeatBadgeGroup() {
@@ -84,7 +86,8 @@ export default class RhythmBoard {
         )
             .setScale(2)
             .setAlpha(0.7)
-            .setDepth(HIT_POINTER_DEPTH);
+            .setDepth(HIT_POINTER_DEPTH)
+            .setScrollFactor(0);
     }
 
     play() {
@@ -120,6 +123,7 @@ export default class RhythmBoard {
         const badge =  this.beatBadgeGroup.get(x, this.background.y)
             ?.setActive(true)
             .setMask(this.mask)
+            .setScrollFactor(0)
             .set(beat)
             .setV(v)
             .setHit(false);

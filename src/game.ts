@@ -1,6 +1,6 @@
 import 'phaser';
 
-import { BEAT_SEQUENCE_000, CANVAS_HEIGHT, CANVAS_WIDTH, CARROT_WIN_COUNT, ISLAND_UNLOCKS, ISLAND_UNLOCK_COORDS, OUT_GAME_UI_DEPTH } from './constant';
+import { BEAT_SEQUENCE_000, CANVAS_HEIGHT, CANVAS_WIDTH, CARROT_WIN_COUNT, ISLAND_HEIGHT, ISLAND_UNLOCKS, ISLAND_UNLOCK_COORDS, OUT_GAME_UI_DEPTH, TILE_SIZE } from './constant';
 import GridManager from './GridManager';
 import { SoundEffects } from './SoundEffect';
 import Hero from './Hero';
@@ -87,6 +87,12 @@ export default class Demo extends Phaser.Scene {
         this.initInput();
 
         this.setGameState('before_game');
+
+        this.initCamera();
+    }
+    
+    initCamera() {
+        this.islandManager.beFocuesdOn(this.cameras.main, { x: 0, y: 0 });
     }
 
     initInput() {
@@ -106,7 +112,8 @@ export default class Demo extends Phaser.Scene {
                 }
                 this.beforeGameImg = this.add
                     .image(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 'start')
-                    .setDepth(OUT_GAME_UI_DEPTH);
+                    .setDepth(OUT_GAME_UI_DEPTH)
+                    .setScrollFactor(0);
                     break;
 
             case 'in_game':
@@ -119,7 +126,8 @@ export default class Demo extends Phaser.Scene {
             case 'win':
                 this.afterGameImg = this.add
                     .image(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 'win')
-                    .setDepth(OUT_GAME_UI_DEPTH);
+                    .setDepth(OUT_GAME_UI_DEPTH)
+                    .setScrollFactor(0);
                     break;
         }
         gameState = state;
@@ -138,7 +146,9 @@ export default class Demo extends Phaser.Scene {
                 strokeThickness: 5,
                 align: 'left'
             }
-        ).setResolution(4);
+        )
+            .setResolution(4)
+            .setScrollFactor(0);
 
         this.unlockIsandText = this.add.text(
             CANVAS_WIDTH - 135,
@@ -150,7 +160,9 @@ export default class Demo extends Phaser.Scene {
                 color: COLOR.SECONDARY,
                 align: 'left'
             }
-        ).setResolution(4);
+        )
+            .setResolution(4)
+            .setScrollFactor(0);
 
         this.unlockIsandHintText = this.add.text(
             CANVAS_WIDTH - 150,
@@ -162,7 +174,9 @@ export default class Demo extends Phaser.Scene {
                 color: COLOR.SECONDARY_LIGHT,
                 align: 'left'
             }
-        ).setResolution(4);
+        )
+            .setResolution(4)
+            .setScrollFactor(0);
 
         this.add.sprite(
             CANVAS_WIDTH - 155,
@@ -170,7 +184,8 @@ export default class Demo extends Phaser.Scene {
             'carrot',
             6
         )
-            .setScale(3);
+            .setScale(3)
+            .setScrollFactor(0);;
     }
 
     update(time, delta) {
@@ -183,25 +198,32 @@ export default class Demo extends Phaser.Scene {
         }
 
         if (!hero.busy) {
+            let direction;
+            const originIslandCoord = { ...hero.islandCoord };
+            const updateCameraFocus = () => {
+                if (originIslandCoord.x !== hero.islandCoord.x || originIslandCoord.y !== hero.islandCoord.y) {
+                    islandManager.beFocuesdOn(this.cameras.main, hero.islandCoord);
+                }
+            }
             if (input.keyboard.checkDown(cursors.left, 500)) {
-                const left = getLeft(hero.islandCoord, hero.coord);
-                if (gridManager.get(left.islandCoord, left.coord)) {
-                    hero.goLeft();
+                direction = getLeft(hero.islandCoord, hero.coord);
+                if (gridManager.get(direction.islandCoord, direction.coord)) {
+                    hero.goLeft().then(() => updateCameraFocus());
                 }
             } else if (input.keyboard.checkDown(cursors.right, 500)) {
-                const right = getRight(hero.islandCoord, hero.coord);
-                if (gridManager.get(right.islandCoord, right.coord)) {
-                    hero.goRight();
+                direction = getRight(hero.islandCoord, hero.coord);
+                if (gridManager.get(direction.islandCoord, direction.coord)) {
+                    hero.goRight().then(() => updateCameraFocus());
                 }
             } else if (input.keyboard.checkDown(cursors.up, 500)) {
-                const up = getUp(hero.islandCoord, hero.coord);
-                if (gridManager.get(up.islandCoord, up.coord)) {
-                    hero.goUp();
+                direction = getUp(hero.islandCoord, hero.coord);
+                if (gridManager.get(direction.islandCoord, direction.coord)) {
+                    hero.goUp().then(() => updateCameraFocus());
                 }
             } else if (input.keyboard.checkDown(cursors.down, 500)) {
-                const down = getDown(hero.islandCoord, hero.coord);
-                if (gridManager.get(down.islandCoord, down.coord)) {
-                    hero.goDown();
+                direction = getDown(hero.islandCoord, hero.coord);
+                if (gridManager.get(direction.islandCoord, direction.coord)) {
+                    hero.goDown().then(() => updateCameraFocus());
                 }
             }
 

@@ -124,5 +124,16 @@ export default class IslandManager {
             });
         });
     }
+
+    beFocuesdOn(camera: Phaser.Cameras.Scene2D.Camera, coord: ICoord) {
+        const island = this.get(coord);
+        camera.pan(
+            island.x + island.width * 0.5,
+            island.y + 25 + TILE_SIZE * 4,
+            500,
+            Phaser.Math.Easing.Quadratic.InOut,
+            true
+        );
+    }
 }
 
