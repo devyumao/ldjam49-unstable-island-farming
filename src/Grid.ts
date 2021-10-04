@@ -12,7 +12,8 @@ import { ActionType, ICoord, PlantType, SoilState } from './type'
 const SOIL_STATE_FRAME = {
     [SoilState.Virgin]: 0,
     [SoilState.Plowed]: 1,
-    [SoilState.Watered]: 2
+    [SoilState.Watered]: 2,
+    [SoilState.Deprecated]: 0
 };
 
 const PLANT_MATURE_AGE = {
@@ -153,6 +154,12 @@ export default class Grid {
                 }
             ]
         });
+    }
+
+    beDeprected() {
+        this.setSoilState(SoilState.Deprecated);
+        this.soil.setVisible(false);
+        this.plant.setVisible(false);
     }
 
     isMature() {

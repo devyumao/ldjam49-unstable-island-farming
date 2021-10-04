@@ -6,7 +6,8 @@ export interface ICoord {
 export enum SoilState {
     Virgin,
     Plowed,
-    Watered
+    Watered,
+    Deprecated
 }
 
 export enum PlantType {

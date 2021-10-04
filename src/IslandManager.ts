@@ -77,9 +77,71 @@ export default class IslandManager {
         layer.randomize(2, 8, 4, 1, [38, 39, 52]);
         layer.randomize(2, 9, 4, 1, [68, 69]);
 
+        const brokenImage = this.scene.add.image(
+            layer.x,
+            layer.y - 16,
+            'islandCrash',
+            1
+        )
+            .setOrigin(0)
+            .setScale(4)
+            .setVisible(false);
+        layer.setData('brokenImage', brokenImage);
+        layer.setData('broken', 0);
+        layer.setData('timeEvents', []);
+
         this.islands[fromCoord(coord)] = layer;
 
         return layer;
+    }
+
+    updateBroken(coord: ICoord) {
+        const island = this.get(coord);
+        const broken: number = island.getData('broken') + 1;
+        island.setData('broken', broken);
+        switch (broken) {
+            case 1:
+                const timeEvents: Phaser.Time.TimerEvent[] = island.getData('timeEvents');
+                timeEvents.forEach(event => {
+                    event.remove();
+                });
+                island.setData('timeEvents', []);
+                this.scene.time.addEvent({
+                    delay: 400,
+                    callback: () => {
+                        island.fill(47, 2, 7, 1, 1);
+                        island.fill(53, 2, 8, 1, 1);
+                    }
+                });
+                break;
+            case 2:
+                this.scene.time.addEvent({
+                    delay: 400,
+                    callback: () => {
+                        island.fill(62, 0, 3, 1, 1);
+                        island.fill(57, 4, 0, 1, 1);
+                        island.fill(63, 7, 6, 1, 1);
+                    }
+                });
+                break;
+            case 3:
+                this.scene.time.addEvent({
+                    delay: 400,
+                    callback: () => {
+                        island.fill(47, 4, 7, 1, 1);
+                        island.fill(53, 4, 8, 1, 1);
+                        island.fill(62, 0, 5, 1, 1);
+                        island.fill(57, 2, 0, 1, 1);
+                        island.fill(63, 7, 2, 1, 1);
+                    }
+                });
+                break;
+            case 4:
+                this.gridManager.deprecateIslandGrids(coord);
+                island.setVisible(false);
+                island.getData('brokenImage').setVisible(true);
+                break;
+        }
     }
 
     get(coord: ICoord) {
@@ -102,7 +164,7 @@ export default class IslandManager {
 
     animate() {
         Object.values(this.islands).forEach(island => {
-            this.scene.time.addEvent({
+            const timeEvent1 = this.scene.time.addEvent({
                 delay: 6e4 / 120 * 2,
                 loop: true,
                 callback: () => {
@@ -113,8 +175,7 @@ export default class IslandManager {
                 },
                 callbackScope: this
             });
-    
-            this.scene.time.addEvent({
+            const timeEvent2 = this.scene.time.addEvent({
                 delay: 6e4 / 120 * 2,
                 loop: true,
                 callback: () => {
@@ -122,6 +183,7 @@ export default class IslandManager {
                 },
                 callbackScope: this
             });
+            island.setData('timeEvents', [timeEvent1, timeEvent2])
         });
     }
 
@@ -134,6 +196,11 @@ export default class IslandManager {
             Phaser.Math.Easing.Quadratic.InOut,
             true
         );
+    }
+
+    checkAllBroken() {
+        return Object.values(this.islands)
+            .every(island => island.getData('broken') >= 4);
     }
 }
 

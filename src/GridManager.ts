@@ -27,8 +27,18 @@ export default class GridManager {
     }
 
     get(islandCoord: ICoord, coord: ICoord) {
-        const islandGrids = this.grids[fromCoord(islandCoord)];
+        const islandGrids = this.getIslandGrids(islandCoord);
         if (!islandGrids) return null;
         return islandGrids[fromCoord(coord)];
+    }
+
+    getIslandGrids(islandCoord: ICoord) {
+        return this.grids[fromCoord(islandCoord)];
+    }
+
+    deprecateIslandGrids(islandCoord: ICoord) {
+        Object.values(this.getIslandGrids(islandCoord)).forEach(grid => {
+            grid.beDeprected();
+        });
     }
 }

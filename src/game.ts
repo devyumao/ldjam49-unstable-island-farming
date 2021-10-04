@@ -15,7 +15,7 @@ const COLOR = {
     SECONDARY_LIGHT: '#5e8677'
 };
 
-type GameState = 'before_game' | 'in_game' | 'win';
+type GameState = 'before_game' | 'in_game' | 'win' | 'lose';
 
 let score = 0;
 let gameState: GameState;
@@ -41,6 +41,7 @@ export default class Demo extends Phaser.Scene {
 
     preload() {
         this.load.image('tiles', 'assets/island-tiles-8.png');
+        this.load.spritesheet('islandCrash', 'assets/island-crash.png', { frameWidth: 64, frameHeight: 80 });
         this.load.spritesheet('hero', 'assets/hero.png', { frameWidth: 16, frameHeight: 32 });
         this.load.spritesheet('soil', 'assets/island-tiles-8.png', { frameWidth: 16, frameHeight: 16, margin: 8 });
         this.load.spritesheet('carrot', 'assets/carrot.png', { frameWidth: 16, frameHeight: 32 });
@@ -61,6 +62,7 @@ export default class Demo extends Phaser.Scene {
 
         this.load.image('start', 'assets/start.png');
         this.load.image('win', 'assets/win.png');
+        this.load.image('lose', 'assets/lose.png');
     }
 
     create() {
@@ -162,7 +164,8 @@ export default class Demo extends Phaser.Scene {
                     25
                 )
                     .setScale(6)
-                    .setDepth(OUT_GAME_UI_CONTENT_DEPTH);
+                    .setDepth(OUT_GAME_UI_CONTENT_DEPTH)
+                    .setScrollFactor(0);
                 this.anims.create({
                     key: 'applause',
                     frames: this.anims.generateFrameNumbers('hero', { frames: [25, 26, 27] }),
@@ -179,6 +182,13 @@ export default class Demo extends Phaser.Scene {
                     this.carrotParticles.emitters.getAt(0).stop();
                 }, 2000);
                 break;
+            
+            case 'lose':
+                this.add.image(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 'lose')
+                    .setDepth(OUT_GAME_UI_DEPTH)
+                    .setScrollFactor(0);
+                this.rhythmBoard.music.stop();
+
         }
         gameState = state;
     }
@@ -240,6 +250,10 @@ export default class Demo extends Phaser.Scene {
 
     update(time, delta) {
         const { input, cursors, hero, rhythmBoard, gridManager, islandManager } = this;
+
+        if (islandManager.checkAllBroken()) {
+
+        }
 
         if (!hero.busy) {
             let direction;
@@ -303,6 +317,7 @@ export default class Demo extends Phaser.Scene {
                             });
                     } else {
                         this.cameras.main.shake(200, 0.02);
+                        islandManager.updateBroken(grid.islandCoord);
                     }
                 }
             }
