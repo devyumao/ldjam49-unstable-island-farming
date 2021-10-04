@@ -63,7 +63,7 @@ export default class RhythmBoard {
             this.background.x, this.background.y,
             'stave', 8
         )
-            .setScale(100, 2)
+            .setScale(100, 4)
             .setAlpha(0.7);
     }
 

@@ -1,13 +1,15 @@
 import { GRID_PER_ISLAND_SIDE, GRID_SIZE, HERO_BASE_DEPTH, ISLAND_INNER_SIZE } from './constant';
-import Grid from './Grid';
+import GridManager from './GridManager';
 import { SoundEffects } from './SoundEffect';
-import { ICoord, SoilState } from './type';
+import { ActionType, ICoord, SoilState } from './type';
+import { getDown, getLeft, getRight, getUp } from './utils';
 
 const HERO_MOVE_DURATION = 150;
 
 export default class Hero extends Phaser.GameObjects.Sprite {
     islandCoord: ICoord;
     coord: ICoord;
+    busy = false;
 
     constructor(
         scene: Phaser.Scene,
@@ -69,23 +71,31 @@ export default class Hero extends Phaser.GameObjects.Sprite {
             repeat: 0
         });
 
+        const busyActions = ['jump', 'plow', 'sow', 'water', 'reap'];
+        this.on(Phaser.Animations.Events.ANIMATION_START, (anim: any) => {
+            if (busyActions.includes(anim.key)) {
+                this.busy = true;
+            }
+        });
+        this.on(Phaser.Animations.Events.ANIMATION_COMPLETE, (anim: any) => {
+            if (busyActions.includes(anim.key)) {
+                this.busy = false;
+            }
+        });
+
         this.idle();
     }
 
-    interact(grid: Grid) {
-        switch (grid.soilState) {
-            case SoilState.Virgin:
+    interact(action: ActionType) {
+        switch (action) {
+            case ActionType.Plow:
                 return this.plow();
-            case SoilState.Plowed:
+            case ActionType.Sow:
+                return this.sow();
+            case ActionType.Water:
                 return this.water();
-            case SoilState.Watered:
-                if (!grid.hasPlant()) {
-                    return this.sow();
-                }
-                if (grid.isMature()) {
-                    return this.reap();
-                }
-                return Promise.resolve();
+            case ActionType.Reap:
+                return this.reap();
             default:
                 return Promise.resolve();
         }
@@ -123,9 +133,9 @@ export default class Hero extends Phaser.GameObjects.Sprite {
     }: { key: string; event?: string; delay?: number; revertTime?: number }) {
         const duration = 200;
         return new Promise(resolve => {
+            this.play({ key, duration });
             // HACK
             if (event === Phaser.Animations.Events.ANIMATION_START) {
-                this.play({ key, duration })
                 this.scene.time.addEvent({
                     delay,
                     repeat: 0,
@@ -133,8 +143,7 @@ export default class Hero extends Phaser.GameObjects.Sprite {
                     callbackScope: this
                 });
             } else {
-                this.play({ key, duration })
-                    .once(event, resolve, this);
+                this.once(event, resolve, this);
             }
         });
     }
@@ -145,12 +154,9 @@ export default class Hero extends Phaser.GameObjects.Sprite {
                 x: this.x - GRID_SIZE
             },
             onComplete: () => {
-                if (this.coord.x > 0) {
-                    this.coord.x--;
-                } else {
-                    this.islandCoord.x--;
-                    this.coord.x = GRID_PER_ISLAND_SIDE - 1;
-                }
+                const left = getLeft(this.islandCoord, this.coord);
+                this.islandCoord = left.islandCoord;
+                this.coord = left.coord;
             }
         });
     }
@@ -161,12 +167,9 @@ export default class Hero extends Phaser.GameObjects.Sprite {
                 x: this.x + GRID_SIZE
             },
             onComplete: () => {
-                if (this.coord.x < GRID_PER_ISLAND_SIDE - 1) {
-                    this.coord.x++;
-                } else {
-                    this.islandCoord.x++;
-                    this.coord.x = 0;
-                }
+                const right = getRight(this.islandCoord, this.coord);
+                this.islandCoord = right.islandCoord;
+                this.coord = right.coord;
             }
         });
     }
@@ -178,12 +181,9 @@ export default class Hero extends Phaser.GameObjects.Sprite {
             },
             onComplete: () => {
                 this.depth -= 2;
-                if (this.coord.y > 0) {
-                    this.coord.y--;
-                } else {
-                    this.islandCoord.y--;
-                    this.coord.y = GRID_PER_ISLAND_SIDE - 1;
-                }
+                const up = getUp(this.islandCoord, this.coord);
+                this.islandCoord = up.islandCoord;
+                this.coord = up.coord;
             }
         });
     }
@@ -195,12 +195,9 @@ export default class Hero extends Phaser.GameObjects.Sprite {
             },
             onComplete: () => {
                 this.depth += 2;
-                if (this.coord.y < GRID_PER_ISLAND_SIDE - 1) {
-                    this.coord.y++;
-                } else {
-                    this.islandCoord.y++;
-                    this.coord.y = 0;
-                }
+                const down = getDown(this.islandCoord, this.coord);
+                this.islandCoord = down.islandCoord;
+                this.coord = down.coord;
             }
         });
     }

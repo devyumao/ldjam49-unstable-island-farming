@@ -20,7 +20,7 @@ export default class BeatBadge extends Phaser.GameObjects.Image {
         this.setScale(2);
         switch (beatType) {
             case BeatType.Big:
-                this.setTexture('beat');
+                this.setTexture('beat', 0);
                 if (!this.icon) {
                     this.initIcon(action);
                 } else {
@@ -48,6 +48,17 @@ export default class BeatBadge extends Phaser.GameObjects.Image {
     setHit(hit: boolean) {
         this.hit = hit;
         return this;
+    }
+
+    beHit() {
+        switch (this.beatType) {
+            case BeatType.Big:
+                this.setHit(true);
+                this.setFrame(1);
+                break;
+            case BeatType.Small:
+                break;
+        }
     }
 
     isBigType() {
@@ -102,7 +113,7 @@ export default class BeatBadge extends Phaser.GameObjects.Image {
 
         switch (this.beatType) {
             case BeatType.Big:
-                if (this.available) {
+                if (this.available || this.hit) {
                     this.setAlpha(0.8);
                     this.icon?.setAlpha(1);
                 } else {

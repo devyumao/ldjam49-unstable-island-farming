@@ -5,16 +5,8 @@ import GridManager from './GridManager';
 import { SoundEffects } from './SoundEffect';
 import Hero from './Hero';
 import RhythmBoard from './RhythmBoard';
+import { getDown, getLeft, getRight, getUp } from './utils';
 
-// const rhythm = {
-//     bps: 72,
-//     sequence: [
-//         { key: ActionKey.Pow, start: 5 },
-//         { key: ActionKey.Sow, start: 9 },
-//         { key: ActionKey.Water, start: 13 },
-//         { key: ActionKey.Reap, start: 17 }
-//     ]
-// };
 
 export default class Demo extends Phaser.Scene {
     map: Phaser.Tilemaps.Tilemap;
@@ -63,8 +55,6 @@ export default class Demo extends Phaser.Scene {
         this.rhythmBoard = new RhythmBoard(this, { bps: 72, sequence: BEAT_SEQUENCE_000 });
 
         this.initInput();
-
-        // this.renderDebug();
     }
 
     initMap() {
@@ -121,64 +111,52 @@ export default class Demo extends Phaser.Scene {
     }
 
     update(time, delta) {
-        const { input, cursors, hero, rhythmBoard } = this;
+        const { input, cursors, hero, rhythmBoard, gridManager } = this;
 
-        if (input.keyboard.checkDown(cursors.left, 200)
-            && !this.isBlockedByLayer(hero.x - TILE_SIZE * 2, hero.y)
-        ) {
-            hero.goLeft();
-        } else if (input.keyboard.checkDown(cursors.right, 200)
-            && !this.isBlockedByLayer(hero.x + TILE_SIZE * 2, hero.y)
-        ) {
-            hero.goRight();
-        } else if (input.keyboard.checkDown(cursors.up, 200)
-            && !this.isBlockedByLayer(hero.x, hero.y - TILE_SIZE * 2)
-        ) {
-            hero.goUp();
-        } else if (input.keyboard.checkDown(cursors.down, 200)
-            && !this.isBlockedByLayer(hero.x, hero.y + TILE_SIZE * 2)
-        ) {
-            hero.goDown();
-        }
+        if (!hero.busy) {
+            if (input.keyboard.checkDown(cursors.left, 500)) {
+                const left = getLeft(hero.islandCoord, hero.coord);
+                if (gridManager.get(left.islandCoord, left.coord)) {
+                    hero.goLeft();
+                }
+            } else if (input.keyboard.checkDown(cursors.right, 500)) {
+                const right = getRight(hero.islandCoord, hero.coord);
+                if (gridManager.get(right.islandCoord, right.coord)) {
+                    hero.goRight();
+                }
+            } else if (input.keyboard.checkDown(cursors.up, 500)) {
+                const up = getUp(hero.islandCoord, hero.coord);
+                if (gridManager.get(up.islandCoord, up.coord)) {
+                    hero.goUp();
+                }
+            } else if (input.keyboard.checkDown(cursors.down, 500)) {
+                const down = getDown(hero.islandCoord, hero.coord);
+                if (gridManager.get(down.islandCoord, down.coord)) {
+                    hero.goDown();
+                }
+            }
 
-        const grid = this.gridManager.get(hero.islandCoord, hero.coord);
-        if (grid) {
-            const avalableActions = grid.getAvailableActions();
-            rhythmBoard.updateBeatsAvailable(avalableActions);
-        }
-
-        if (input.keyboard.checkDown(cursors.space, 500)) {
+            const grid = gridManager.get(hero.islandCoord, hero.coord);
             if (grid) {
-                const badge = rhythmBoard.getHitableBeat();
-                console.log(badge);
-                if (badge) {
-                    badge.setHit(true);
-                    hero.interact(grid)
-                        .then(() => {
-                            grid.beInteracted();
-                        });
-                } else {
+                const avalableActions = grid.getAvailableActions();
+                rhythmBoard.updateBeatsAvailable(avalableActions);
+            }
 
+            if (input.keyboard.checkDown(cursors.space, 500)) {
+                if (grid) {
+                    const badge = rhythmBoard.getHitableBeat();
+                    if (badge) {
+                        badge.beHit();
+                        const action = badge.action;
+                        hero.interact(action)
+                            .then(() => {
+                                grid.beInteracted(action);
+                            });
+                    } else {
+                    }
                 }
             }
         }
-    }
-
-    isBlockedByLayer(x: number, y: number) {
-        const tile = this.layer.getTileAtWorldXY(x, y, true);
-        // return COLLISION_TILES.includes(tile.index);
-        // FIMXE: temp
-        return false;
-    }
-
-    renderDebug() {
-        const debugGraphics = this.add.graphics();
-        debugGraphics.clear();
-        this.map.renderDebug(debugGraphics, {
-            tileColor: null, // Non-colliding tiles
-            collidingTileColor: new Phaser.Display.Color(243, 134, 48, 200), // Colliding tiles
-            faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Colliding face edges
-        });
     }
 }
 
@@ -192,12 +170,6 @@ const config: Phaser.Types.Core.GameConfig = {
         mode: Phaser.Scale.ScaleModes.FIT,
         autoCenter: Phaser.Scale.Center.CENTER_BOTH
     },
-    // physics: {
-    //     default: 'arcade',
-    //     arcade: {
-    //         gravity: { y: 0 }
-    //     }
-    // },
     scene: Demo
 };
 

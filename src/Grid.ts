@@ -65,25 +65,20 @@ export default class Grid {
             .setOrigin(0.5, 0.75)
             .setDepth(PLANT_BASE_DEPTH + (GRID_PER_ISLAND_SIDE * islandCoord.y + coord.y) * 2);
     }
- 
-    // interact({ seed }: { seed?: PlantType }) {
-    //     this.changeSoilState();
-    // }
 
-    beInteracted() {
-        switch (this.soilState) {
-            case SoilState.Virgin:
+    beInteracted(action: ActionType) {
+        switch (action) {
+            case ActionType.Plow:
                 this.bePlowed();
                 break;
-            case SoilState.Plowed:
+            case ActionType.Sow:
+                this.beSowed();
+                break;
+            case ActionType.Water:
                 this.beWatered();
                 break;
-            case SoilState.Watered:
-                if (!this.hasPlant()) {
-                    this.beSowed();
-                } else if (this.isMature()) {
-                    this.beReaped();
-                }
+            case ActionType.Reap:
+                this.beReaped();
                 break;
         }
     }
@@ -94,19 +89,19 @@ export default class Grid {
 
     beWatered() {
         this.setSoilState(SoilState.Watered);
+
+        if (this.plantAge === 0) {
+            this.grow();
+        }
     }
 
     beSowed() {
         this.setPlantAge(0);
         this.plant.setAlpha(1);
-        this.scene.time.addEvent({
-            delay: PLAT_AGE_DURATION[this.plantType],
-            repeat: PLANT_MATURE_AGE[this.plantType] - 1,
-            callback: () => {
-                this.setPlantAge(this.plantAge + 1);
-            },
-            callbackScope: this
-        });
+
+        if (this.soilState === SoilState.Watered) {
+            this.grow();
+        }
     }
 
     beReaped() {
@@ -157,6 +152,9 @@ export default class Grid {
             case SoilState.Virgin:
                 return [ActionType.Plow];
             case SoilState.Plowed:
+                if (this.hasPlant()) {
+                    return [ActionType.Water]
+                }
                 return [ActionType.Water, ActionType.Sow];
             case SoilState.Watered:
                 if (!this.hasPlant()) {
@@ -169,6 +167,17 @@ export default class Grid {
             default:
                 return [];
         }
+    }
+
+    private grow() {
+        this.scene.time.addEvent({
+            delay: PLAT_AGE_DURATION[this.plantType],
+            repeat: PLANT_MATURE_AGE[this.plantType] - 1,
+            callback: () => {
+                this.setPlantAge(this.plantAge + 1);
+            },
+            callbackScope: this
+        });
     }
 
     private setSoilState(state: SoilState) {
