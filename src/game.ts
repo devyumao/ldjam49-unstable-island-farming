@@ -1,6 +1,6 @@
 import 'phaser';
 
-import { BEAT_SEQUENCE_000, CANVAS_HEIGHT, CANVAS_WIDTH } from './constant';
+import { BEAT_SEQUENCE_000, CANVAS_HEIGHT, CANVAS_WIDTH, CARROT_WIN_COUNT, ISLAND_UNLOCKS, OUT_GAME_UI_DEPTH } from './constant';
 import GridManager from './GridManager';
 import { SoundEffects } from './SoundEffect';
 import Hero from './Hero';
@@ -15,6 +15,11 @@ const COLOR = {
     SECONDARY_LIGHT: '#5e8677'
 };
 
+type GameState = 'before_game' | 'in_game' | 'win';
+
+let score = 0;
+let gameState: GameState;
+
 export default class Demo extends Phaser.Scene {
     islandManager: IslandManager
     hero: Hero;
@@ -22,6 +27,11 @@ export default class Demo extends Phaser.Scene {
     gridManager: GridManager;
     rhythmBoard: RhythmBoard;
     soundEffects: SoundEffects;
+    beforeGameImg: Phaser.GameObjects.Image;
+    afterGameImg: Phaser.GameObjects.Image;
+    scoreText: Phaser.GameObjects.Text;
+    unlockIsandText: Phaser.GameObjects.Text;
+    unlockIsandHintText: Phaser.GameObjects.Text;
 
     constructor() {
         super('demo');
@@ -40,15 +50,20 @@ export default class Demo extends Phaser.Scene {
 
         this.load.css('headers', 'assets/style.css');
 
-        this.load.audio('music', 'assets/audio/music.wav');
+        this.load.audio('music', 'assets/audio/music.mp3');
 
         SoundEffects.names
             .forEach(name => {
                 this.load.audio(name, `assets/audio/${name}.mp3`);
             });
+
+        this.load.image('start', 'assets/start.png');
+        this.load.image('win', 'assets/win.png');
     }
 
     create() {
+        score = 0;
+
         this.islandManager = new IslandManager(this)
             .create({ x: 0, y: -1 })
             .create({ x: -1, y: 0 })
@@ -79,17 +94,51 @@ export default class Demo extends Phaser.Scene {
         this.initScore();
 
         this.initInput();
+
+        this.setGameState('before_game');
     }
 
     initInput() {
         this.cursors = this.input.keyboard.createCursorKeys();
     }
 
+    setGameState(state: GameState) {
+        if (state === gameState) {
+            return;
+        }
+
+        switch (state) {
+            case 'before_game':
+                if (this.afterGameImg) {
+                    this.afterGameImg.destroy();
+                    this.afterGameImg = null;
+                }
+                this.beforeGameImg = this.add
+                    .image(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 'start')
+                    .setDepth(OUT_GAME_UI_DEPTH);
+                    break;
+
+            case 'in_game':
+                if (this.beforeGameImg) {
+                    this.beforeGameImg.destroy();
+                    this.beforeGameImg = null;
+                }
+                break;
+
+            case 'win':
+                this.afterGameImg = this.add
+                    .image(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 'win')
+                    .setDepth(OUT_GAME_UI_DEPTH);
+                    break;
+        }
+        gameState = state;
+    }
+
     initScore() {
-        this.add.text(
+        this.scoreText = this.add.text(
             CANVAS_WIDTH - 130,
             30,
-            '  0/100',
+            '0/' + CARROT_WIN_COUNT,
             {
                 fontSize: '24px',
                 fontFamily: 'pixel',
@@ -98,11 +147,12 @@ export default class Demo extends Phaser.Scene {
                 strokeThickness: 5,
                 align: 'left'
             }
-        );
-        this.add.text(
+        ).setResolution(4);
+
+        this.unlockIsandText = this.add.text(
             CANVAS_WIDTH - 135,
             70,
-            '4 MORE',
+            ISLAND_UNLOCKS[0] + ' MORE',
             {
                 fontSize: '30px',
                 fontFamily: 'pixel',
@@ -111,10 +161,10 @@ export default class Demo extends Phaser.Scene {
             }
         ).setResolution(4);
 
-        this.add.text(
-            CANVAS_WIDTH - 165,
+        this.unlockIsandHintText = this.add.text(
+            CANVAS_WIDTH - 150,
             105,
-            'BEFORE NEXT ISLAND',
+            'TO UNLOCK ISLAND',
             {
                 fontSize: '20px',
                 fontFamily: 'pixel',
@@ -171,12 +221,24 @@ export default class Demo extends Phaser.Scene {
             }
 
             if (input.keyboard.checkDown(cursors.space, 500)) {
+                if (gameState === 'before_game') {
+                    this.setGameState('in_game');
+                    return;
+                }
+                if (gameState === 'win') {
+                    this.scene.restart();
+                    return;
+                }
                 rhythmBoard.animateHitPoint();
                 if (grid) {
                     const badge = rhythmBoard.getHitableBeat();
                     if (badge) {
                         badge.beHit();
                         const action = badge.action;
+                        if (action === 'reap') {
+                            this.updateScore(score + 1);
+                        }
+
                         hero.interact(action)
                             .then(() => {
                                 grid.beInteracted(action);
@@ -187,6 +249,36 @@ export default class Demo extends Phaser.Scene {
                 }
             }
         }
+    }
+
+    updateScore(newScore) {
+        this.scoreText.setText(newScore + '/' + CARROT_WIN_COUNT);
+
+        let hasMoreUnlock = false;
+        for (let i = ISLAND_UNLOCKS.length - 1; i >= 0; --i) {
+            if (i === 0 || ISLAND_UNLOCKS[i - 1] < newScore) {
+                if (ISLAND_UNLOCKS[i] === newScore) {
+                    // TODO: unlock an island
+
+                    if (i < ISLAND_UNLOCKS.length - 1) {
+                        hasMoreUnlock = true;
+                        this.unlockIsandText.setText(ISLAND_UNLOCKS[i + 1] - newScore + ' MORE');
+                        break;
+                    }
+                }
+                else if (ISLAND_UNLOCKS[i] > newScore) {
+                    hasMoreUnlock = true;
+                    this.unlockIsandText.setText(ISLAND_UNLOCKS[i] - newScore + ' MORE');
+                    break;
+                }
+            }
+        }
+        if (!hasMoreUnlock) {
+            this.unlockIsandHintText.destroy();
+            this.unlockIsandText.destroy();
+        }
+
+        score = newScore;
     }
 }
 

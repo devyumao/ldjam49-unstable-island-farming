@@ -17,7 +17,8 @@ export class SoundEffects {
         this._sounds = {};
         SoundEffects.names.forEach(name => {
             this._sounds[name] = sound.add(name, {
-                volume: 0.7
+                volume: 0.7,
+                loop: name === 'applause'
             });
         });
     }
@@ -25,6 +26,12 @@ export class SoundEffects {
     play(name: SoundEffectName) {
         if (this._sounds[name]) {
             (this._sounds[name] as Phaser.Sound.BaseSound).play();
+        }
+    }
+
+    stop(name: string) {
+        if (this._sounds[name]) {
+            (this._sounds[name] as Phaser.Sound.BaseSound).stop();
         }
     }
 
