@@ -112,6 +112,10 @@ export default class RhythmBoard {
         });
     }
 
+    stop() {
+        this.music.stop();
+    }
+
     private createBeat() {
         const x = this.scene.scale.width * 0.5 + BEAT_BADGE_SPACING * this.delayBeats;
         const unitTime = 6e4 / this.bps * 0.5;

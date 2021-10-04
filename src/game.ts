@@ -1,6 +1,6 @@
 import 'phaser';
 
-import { BEAT_SEQUENCE_000, CANVAS_HEIGHT, CANVAS_WIDTH, CARROT_WIN_COUNT, ISLAND_UNLOCKS, ISLAND_UNLOCK_COORDS, OUT_GAME_UI_DEPTH } from './constant';
+import { BEAT_SEQUENCE_000, CANVAS_HEIGHT, CANVAS_WIDTH, CARROT_PARTICLE_DEPTH, CARROT_WIN_COUNT, ISLAND_UNLOCKS, ISLAND_UNLOCK_COORDS, OUT_GAME_UI_CONTENT_DEPTH, OUT_GAME_UI_DEPTH } from './constant';
 import GridManager from './GridManager';
 import { SoundEffects } from './SoundEffect';
 import Hero from './Hero';
@@ -32,6 +32,8 @@ export default class Demo extends Phaser.Scene {
     scoreText: Phaser.GameObjects.Text;
     unlockIsandText: Phaser.GameObjects.Text;
     unlockIsandHintText: Phaser.GameObjects.Text;
+    carrotParticles: Phaser.GameObjects.Particles.ParticleEmitterManager;
+    applauseHero: Phaser.GameObjects.Sprite;
 
     constructor() {
         super('demo');
@@ -82,6 +84,25 @@ export default class Demo extends Phaser.Scene {
             music: this.sound.add('music', { loop: true })
         });
 
+        this.beforeGameImg = this.add
+            .image(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 'start')
+            .setDepth(OUT_GAME_UI_DEPTH);
+
+        this.carrotParticles = this.add.particles('carrot', 8, [{
+            x: CANVAS_WIDTH,
+            y: CANVAS_HEIGHT,
+            angle: {min: -90, max: 90},
+            speedX: {min: -1000, max: -100},
+            speedY: {min: -1500, max: -300},
+            gravityY: 800,
+            lifespan: 3000,
+            quantity: 6,
+            scale: {min: 0.2, max: 6},
+            rotate: {min: -180, max: 180}
+        }])
+            .setDepth(CARROT_PARTICLE_DEPTH);
+            this.carrotParticles.emitters.getAt(0).stop();
+
         this.initScore();
 
         this.initInput();
@@ -98,16 +119,13 @@ export default class Demo extends Phaser.Scene {
             return;
         }
 
+        this.carrotParticles.emitters.getAt(0).stop();
+
         switch (state) {
             case 'before_game':
-                if (this.afterGameImg) {
-                    this.afterGameImg.destroy();
-                    this.afterGameImg = null;
-                }
-                this.beforeGameImg = this.add
-                    .image(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 'start')
-                    .setDepth(OUT_GAME_UI_DEPTH);
-                    break;
+                this.soundEffects.stop('applause');
+                this.rhythmBoard.stop();
+                break;
 
             case 'in_game':
                 if (this.beforeGameImg) {
@@ -116,12 +134,41 @@ export default class Demo extends Phaser.Scene {
                 }
                 this.rhythmBoard.play();
                 this.islandManager.animate();
+
+                this.carrotParticles.emitters.getAt(0).start();
+                setTimeout(() => {
+                    this.carrotParticles.emitters.getAt(0).stop();
+                }, 200);
                 break;
 
             case 'win':
                 this.afterGameImg = this.add
                     .image(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 'win')
                     .setDepth(OUT_GAME_UI_DEPTH);
+
+                this.applauseHero = this.add.sprite(
+                    CANVAS_WIDTH * 0.4,
+                    CANVAS_HEIGHT * 0.58,
+                    'hero',
+                    25
+                )
+                    .setScale(6)
+                    .setDepth(OUT_GAME_UI_CONTENT_DEPTH);
+                this.anims.create({
+                    key: 'applause',
+                    frames: this.anims.generateFrameNumbers('hero', { frames: [25, 26, 27] }),
+                    frameRate: 15,
+                    repeat: -1
+                });
+                this.applauseHero.play('applause');
+
+                this.soundEffects.play('wow');
+                this.soundEffects.play('applause');
+
+                this.carrotParticles.emitters.getAt(0).start();
+                setTimeout(() => {
+                    this.carrotParticles.emitters.getAt(0).stop();
+                }, 2000);
                     break;
         }
         gameState = state;
@@ -195,6 +242,8 @@ export default class Demo extends Phaser.Scene {
                     hero.goUp();
                 }
             } else if (input.keyboard.checkDown(cursors.down, 500)) {
+                this.setGameState('win');
+                return true;
                 const down = getDown(hero.islandCoord, hero.coord);
                 if (gridManager.get(down.islandCoord, down.coord)) {
                     hero.goDown();
@@ -213,6 +262,7 @@ export default class Demo extends Phaser.Scene {
                     return;
                 }
                 if (gameState === 'win') {
+                    this.setGameState('before_game');
                     this.scene.restart();
                     return;
                 }
