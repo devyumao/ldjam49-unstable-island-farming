@@ -1,10 +1,20 @@
 import { ActionType, BeatType, PlantType } from './type';
 
+export const CANVAS_WIDTH = 1200;
+export const CANVAS_HEIGHT = 750;
+export const CANVAS_HALF_WIDTH = CANVAS_WIDTH * 0.5;
+export const CANVAS_HALF_HEIGHT = CANVAS_HEIGHT * 0.5;
+
 export const TILE_SIZE = 32;
 export const GRID_SIZE = TILE_SIZE * 2;
+
 export const ISLAND_INNER_SIZE = TILE_SIZE * 6;
+export const ISLAND_WIDTH = TILE_SIZE * 8;
+export const ISLAND_HEIGHT = TILE_SIZE * 10;
 
 export const GRID_PER_ISLAND_SIDE = 3;
+
+export const CENTER_GRID_Y = 350;
 
 export const HERO_BASE_DEPTH = 999;
 export const PLANT_BASE_DEPTH = 1000;

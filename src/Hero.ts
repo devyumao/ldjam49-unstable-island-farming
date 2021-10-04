@@ -1,4 +1,4 @@
-import { GRID_PER_ISLAND_SIDE, GRID_SIZE, HERO_BASE_DEPTH, ISLAND_INNER_SIZE } from './constant';
+import { CANVAS_HALF_WIDTH, CENTER_GRID_Y, GRID_PER_ISLAND_SIDE, GRID_SIZE, HERO_BASE_DEPTH, ISLAND_INNER_SIZE } from './constant';
 import GridManager from './GridManager';
 import { SoundEffects } from './SoundEffect';
 import { ActionType, ICoord, SoilState } from './type';
@@ -16,12 +16,7 @@ export default class Hero extends Phaser.GameObjects.Sprite {
         protected soundEffects: SoundEffects,
         { islandCoord, coord }: { islandCoord: ICoord, coord: ICoord }
     ) {
-        super(
-            scene,
-            32 + ISLAND_INNER_SIZE * islandCoord.x + GRID_SIZE * (coord.x + 0.5),
-            32 + ISLAND_INNER_SIZE * islandCoord.y + GRID_SIZE * (coord.y + 0.5),
-            'hero', 1
-        );
+        super(scene, CANVAS_HALF_WIDTH, CENTER_GRID_Y, 'hero', 1);
         scene.add.existing(this);
         this.islandCoord = islandCoord;
         this.coord = coord;
@@ -155,7 +150,7 @@ export default class Hero extends Phaser.GameObjects.Sprite {
     goLeft() {
         this.go({
             props: {
-                x: this.x - GRID_SIZE
+                x: this.x - GRID_SIZE * (this.coord.x > 0 ?  1 : 2)
             },
             onComplete: () => {
                 const left = getLeft(this.islandCoord, this.coord);
@@ -168,7 +163,7 @@ export default class Hero extends Phaser.GameObjects.Sprite {
     goRight() {
         this.go({
             props: {
-                x: this.x + GRID_SIZE
+                x: this.x + GRID_SIZE * (this.coord.x < GRID_PER_ISLAND_SIDE - 1 ?  1 : 2)
             },
             onComplete: () => {
                 const right = getRight(this.islandCoord, this.coord);
@@ -181,7 +176,7 @@ export default class Hero extends Phaser.GameObjects.Sprite {
     goUp() {
         this.go({
             props: {
-                y: this.y - GRID_SIZE
+                y: this.y - GRID_SIZE * (this.coord.y > 0 ?  1 : 2)
             },
             onComplete: () => {
                 this.depth -= 2;
@@ -195,7 +190,7 @@ export default class Hero extends Phaser.GameObjects.Sprite {
     goDown() {
         this.go({
             props: {
-                y: this.y + GRID_SIZE
+                y: this.y + GRID_SIZE * (this.coord.y < GRID_PER_ISLAND_SIDE - 1 ?  1 : 2)
             },
             onComplete: () => {
                 this.depth += 2;

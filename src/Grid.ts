@@ -1,7 +1,10 @@
 import {
+    CANVAS_HALF_WIDTH,
+    CENTER_GRID_Y,
     GRID_PER_ISLAND_SIDE,
     GRID_SIZE,
     ISLAND_INNER_SIZE,
+    ISLAND_WIDTH,
     PLANT_BASE_DEPTH
 } from './constant';
 import { ActionType, ICoord, PlantType, SoilState } from './type'
@@ -42,10 +45,9 @@ export default class Grid {
     }
 
     private initSoil() {
-        const { islandCoord, coord } = this;
         this.soil = this.scene.add.sprite(
-            32 + ISLAND_INNER_SIZE * islandCoord.x + GRID_SIZE * (coord.x + 0.5),
-            32 + ISLAND_INNER_SIZE * islandCoord.y + GRID_SIZE * (coord.y + 0.5),
+            this.calcX(),
+            this.calcY(),
             'soil',
             SOIL_STATE_FRAME[this.soilState]
         )
@@ -55,8 +57,8 @@ export default class Grid {
     private initPlant() {
         const { islandCoord, coord } = this;
         this.plant = this.scene.add.sprite(
-            32 + ISLAND_INNER_SIZE * islandCoord.x + GRID_SIZE * (coord.x + 0.5),
-            32 + ISLAND_INNER_SIZE * islandCoord.y + GRID_SIZE * (coord.y + 0.5),
+            this.calcX(),
+            this.calcY(),
             this.plantType,
             0
         )
@@ -64,6 +66,20 @@ export default class Grid {
             .setScale(4)
             .setOrigin(0.5, 0.75)
             .setDepth(PLANT_BASE_DEPTH + (GRID_PER_ISLAND_SIDE * islandCoord.y + coord.y) * 2);
+    }
+
+    private calcX() {
+        return CANVAS_HALF_WIDTH
+            + ISLAND_INNER_SIZE * -0.5
+            + ISLAND_WIDTH * this.islandCoord.x
+            + GRID_SIZE * (this.coord.x + 0.5);
+    }
+
+    private calcY() {
+        return CENTER_GRID_Y
+            + ISLAND_INNER_SIZE * -0.5
+            + ISLAND_WIDTH * this.islandCoord.y
+            + GRID_SIZE * (this.coord.y + 0.5)
     }
 
     beInteracted(action: ActionType) {

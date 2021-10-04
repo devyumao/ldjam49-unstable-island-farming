@@ -11,7 +11,7 @@ export default class GridManager {
         this.scene = scene;
     }
 
-    initIslandGrids(islandCoord: ICoord) {
+    createIslandGrids(islandCoord: ICoord) {
         const { scene } = this;
         const islandGrids = {};
         for (let i = 0; i < GRID_PER_ISLAND_SIDE; i++) {
@@ -23,6 +23,7 @@ export default class GridManager {
             }
         }
         this.grids[fromCoord(islandCoord)] = islandGrids;
+        return this;
     }
 
     get(islandCoord: ICoord, coord: ICoord) {
