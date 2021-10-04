@@ -21,6 +21,7 @@ export const PLANT_BASE_DEPTH = 1000;
 export const RHYTHMBOARD = 4090;
 export const BEAT_BADGE_DEPTH = 5000;
 export const HIT_POINTER_DEPTH = 5010;
+export const OUT_GAME_UI_DEPTH = 10000;
 
 export const BEAT_BADGE_SPACING = 60;
 
@@ -28,7 +29,7 @@ export const ACTION_ICON_FRAME = {
     [ActionType.Plow]: 5,
     [`${ActionType.Sow}-${PlantType.Carrot}`]: 6,
     [ActionType.Water]: 13,
-    [ActionType.Reap]: 14 
+    [ActionType.Reap]: 14
 };
 
 export const BEAT_SEQUENCE_000 = [

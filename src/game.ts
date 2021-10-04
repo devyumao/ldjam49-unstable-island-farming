@@ -1,6 +1,6 @@
 import 'phaser';
 
-import { BEAT_SEQUENCE_000, CANVAS_HEIGHT, CANVAS_WIDTH } from './constant';
+import { BEAT_SEQUENCE_000, CANVAS_HEIGHT, CANVAS_WIDTH, OUT_GAME_UI_DEPTH } from './constant';
 import GridManager from './GridManager';
 import { SoundEffects } from './SoundEffect';
 import Hero from './Hero';
@@ -15,6 +15,11 @@ const COLOR = {
     SECONDARY_LIGHT: '#5e8677'
 };
 
+type GameState = 'before_game' | 'in_game' | 'win';
+
+let score = 0;
+let gameState: GameState;
+
 export default class Demo extends Phaser.Scene {
     islandManager: IslandManager
     hero: Hero;
@@ -22,6 +27,8 @@ export default class Demo extends Phaser.Scene {
     gridManager: GridManager;
     rhythmBoard: RhythmBoard;
     soundEffects: SoundEffects;
+    beforeGameImg: Phaser.GameObjects.Image;
+    afterGameImg: Phaser.GameObjects.Image;
 
     constructor() {
         super('demo');
@@ -47,12 +54,13 @@ export default class Demo extends Phaser.Scene {
                 this.load.audio(name, `assets/audio/${name}.mp3`);
             });
 
-        // setTimeout(() => {
-            this.load.image('win', 'assets/start.png');
-        // }, 3000);
+        this.load.image('start', 'assets/start.png');
+        this.load.image('win', 'assets/win.png');
     }
 
     create() {
+        score = 0;
+
         this.islandManager = new IslandManager(this)
             .create({ x: 0, y: -1 })
             .create({ x: -1, y: 0 })
@@ -83,10 +91,44 @@ export default class Demo extends Phaser.Scene {
         this.initScore();
 
         this.initInput();
+
+        this.setGameState('before_game');
     }
 
     initInput() {
         this.cursors = this.input.keyboard.createCursorKeys();
+    }
+
+    setGameState(state: GameState) {
+        if (state === gameState) {
+            return;
+        }
+
+        switch (state) {
+            case 'before_game':
+                if (this.afterGameImg) {
+                    this.afterGameImg.destroy();
+                    this.afterGameImg = null;
+                }
+                this.beforeGameImg = this.add
+                    .image(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 'start')
+                    .setDepth(OUT_GAME_UI_DEPTH);
+                    break;
+
+            case 'in_game':
+                if (this.beforeGameImg) {
+                    this.beforeGameImg.destroy();
+                    this.beforeGameImg = null;
+                }
+                break;
+
+            case 'win':
+                this.afterGameImg = this.add
+                    .image(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 'win')
+                    .setDepth(OUT_GAME_UI_DEPTH);
+                    break;
+        }
+        gameState = state;
     }
 
     initScore() {
@@ -185,6 +227,13 @@ export default class Demo extends Phaser.Scene {
             }
 
             if (input.keyboard.checkDown(cursors.space, 500)) {
+                if (gameState === 'before_game') {
+                    this.setGameState('in_game');
+                    return;
+                }
+                if (gameState === 'win') {
+                    this.scene.restart();
+                }
                 if (grid) {
                     const badge = rhythmBoard.getHitableBeat();
                     if (badge) {
@@ -199,10 +248,6 @@ export default class Demo extends Phaser.Scene {
                 }
             }
         }
-    }
-
-    win() {
-        this.add.image(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 'win');
     }
 }
 
