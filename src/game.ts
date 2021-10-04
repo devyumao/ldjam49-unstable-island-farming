@@ -6,6 +6,8 @@ import GridManager from './GridManager';
 import { SoundEffects } from './SoundEffect';
 import Hero from './Hero';
 
+let waveId = 0;
+const maxWaves = 5;
 
 const COLLISION_TILES = [
     0, 1, 2, 3, 4, 5,
@@ -109,7 +111,8 @@ export default class Demo extends Phaser.Scene {
             [18, 7, 8, 7, 8, 7, 8, 23],
             [24, 13, 14, 13, 14, 13, 14, 29],
             [30, 31, 32, 33, 32, 33, 34, 35],
-            [36, 37, 38, 39, 38, 39, 40, 41]
+            [36, 37, 38, 39, 38, 39, 40, 41],
+            [66, 67, 68, 69, 68, 69, 70, 71]
         ];
         islandTilesData.forEach((row, rowIndex) => {
             row.forEach((value, colIndex) => {
@@ -122,6 +125,7 @@ export default class Demo extends Phaser.Scene {
         layer.randomize(2, 7, 4, 1, [32, 33, 46]);
         layer.randomize(0, 2, 1, 4, [12, 18, 22]);
         layer.randomize(2, 8, 4, 1, [38, 39, 52]);
+        layer.randomize(2, 9, 4, 1, [68, 69]);
     }
 
     initInput() {
@@ -181,6 +185,17 @@ export default class Demo extends Phaser.Scene {
 
     update(time, delta) {
         const { input, cursors, hero } = this;
+
+        if (input.keyboard.checkDown(cursors.shift, 200)) {
+            // TODO: for debug
+            const layer = this.layer;
+            // layer.randomize(2, 0, 4, 1, [2, 3, 50]);
+            // layer.randomize(7, 2, 1, 4, [17, 23, 28]);
+            // layer.randomize(2, 7, 4, 1, [32, 33, 46]);
+            // layer.randomize(0, 2, 1, 4, [12, 18, 22]);
+            // layer.randomize(2, 8, 4, 1, [38, 39, 52]);
+            layer.randomize(2, 9, 4, 1, [68, 69]);
+        }
 
         if (input.keyboard.checkDown(cursors.left, 200)
             && !this.isBlockedByLayer(hero.x - TILE_SIZE * 2, hero.y)
