@@ -44,6 +44,8 @@ export default class Demo extends Phaser.Scene {
 
         this.load.css('headers', 'assets/style.css');
 
+        this.load.audio('music', 'assets/audio/music.wav');
+
         SoundEffects.names
             .forEach(name => {
                 this.load.audio(name, `assets/audio/${name}.mp3`);
@@ -63,7 +65,11 @@ export default class Demo extends Phaser.Scene {
             coord: { x: 1, y: 1 }
         });
 
-        this.rhythmBoard = new RhythmBoard(this, { bps: 72, sequence: BEAT_SEQUENCE_000 });
+        this.rhythmBoard = new RhythmBoard(this, {
+            bps: 120,
+            sequence: BEAT_SEQUENCE_000,
+            music: this.sound.add('music', { loop: true })
+        });
 
         this.initScore();
 
@@ -175,15 +181,20 @@ export default class Demo extends Phaser.Scene {
     update(time, delta) {
         const { input, cursors, hero, rhythmBoard, gridManager } = this;
 
-        if (input.keyboard.checkDown(cursors.shift, 200)) {
+        // if (input.keyboard.checkDown(cursors.shift, 200)) {
+        //     // TODO: for debug
+        //     const layer = this.layer;
+        //     // layer.randomize(2, 0, 4, 1, [2, 3, 50]);
+        //     // layer.randomize(7, 2, 1, 4, [17, 23, 28]);
+        //     // layer.randomize(2, 7, 4, 1, [32, 33, 46]);
+        //     // layer.randomize(0, 2, 1, 4, [12, 18, 22]);
+        //     // layer.randomize(2, 8, 4, 1, [38, 39, 52]);
+        //     layer.randomize(2, 9, 4, 1, [68, 69]);
+        // }
+
+        if (input.keyboard.checkDown(cursors.shift, 1000)) {
             // TODO: for debug
-            const layer = this.layer;
-            // layer.randomize(2, 0, 4, 1, [2, 3, 50]);
-            // layer.randomize(7, 2, 1, 4, [17, 23, 28]);
-            // layer.randomize(2, 7, 4, 1, [32, 33, 46]);
-            // layer.randomize(0, 2, 1, 4, [12, 18, 22]);
-            // layer.randomize(2, 8, 4, 1, [38, 39, 52]);
-            layer.randomize(2, 9, 4, 1, [68, 69]);
+            rhythmBoard.play();
         }
 
         if (!hero.busy) {

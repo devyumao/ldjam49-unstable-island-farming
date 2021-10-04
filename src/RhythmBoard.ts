@@ -6,6 +6,7 @@ export interface IRhythmBoardConfig {
     bps: number;
     sequence: IBeat[];
     delayBeats?: number;
+    music: Phaser.Sound.BaseSound;
 }
 
 export default class RhythmBoard {
@@ -14,16 +15,18 @@ export default class RhythmBoard {
     sequence: IBeat[];
     sequenceIndex = 0;
     delayBeats: number = 8;
+    music: Phaser.Sound.BaseSound;
     background: Phaser.GameObjects.Rectangle;
     mask: Phaser.Display.Masks.GeometryMask;
     stave: Phaser.GameObjects.Image;
     beatBadgeGroup: Phaser.GameObjects.Group;
     hitPointer: Phaser.GameObjects.Image;
 
-    constructor(scene: Phaser.Scene, { bps, sequence, delayBeats }: IRhythmBoardConfig) {
+    constructor(scene: Phaser.Scene, { bps, sequence, delayBeats, music }: IRhythmBoardConfig) {
         this.scene = scene;
         this.bps = bps;
         this.sequence = sequence;
+        this.music = music;
         if (delayBeats != null) {
             this.delayBeats = delayBeats;
         }
@@ -33,7 +36,6 @@ export default class RhythmBoard {
         this.initBeatBadgeGroup();
         this.initHitPointer();
 
-        this.play();
     }
 
     private initBackground() {
@@ -88,6 +90,7 @@ export default class RhythmBoard {
 
     play() {
         const unitTime = 6e4 / this.bps * 0.5;
+        this.music.play();
         this.createBeat();
         this.scene.time.addEvent({
             delay: unitTime,
