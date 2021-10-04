@@ -6,6 +6,7 @@ export default class IslandManager {
     map: Phaser.Tilemaps.Tilemap;
     tiles: Phaser.Tilemaps.Tileset;
     scene: Phaser.Scene;
+    islands: Phaser.Tilemaps.TilemapLayer[] = [];
     // islands: { [coord: string]: Phaser.Tilemaps.TilemapLayer } = {};
 
     constructor(scene: Phaser.Scene) {
@@ -58,7 +59,34 @@ export default class IslandManager {
         layer.randomize(2, 8, 4, 1, [38, 39, 52]);
         layer.randomize(2, 9, 4, 1, [68, 69]);
 
+        this.islands.push(layer);
+
         return this;
+    }
+
+    animate() {
+        this.islands.forEach(island => {
+            this.scene.time.addEvent({
+                delay: 6e4 / 120 * 0.5,
+                loop: true,
+                callback: () => {
+                    island.randomize(2, 0, 4, 1, [2, 3, 50]);
+                    island.randomize(7, 2, 1, 4, [17, 23, 28]);
+                    island.randomize(2, 7, 4, 1, [32, 33, 46]);
+                    island.randomize(0, 2, 1, 4, [12, 18, 22]);
+                },
+                callbackScope: this
+            });
+    
+            this.scene.time.addEvent({
+                delay: 6e4 / 120,
+                loop: true,
+                callback: () => {
+                    island.randomize(2, 9, 4, 1, [68, 69]);
+                },
+                callbackScope: this
+            });
+        });
     }
 }
 
