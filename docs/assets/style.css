@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'pixel';
+    src: url('assets/font.woff2') format('woff2'), url('assets/font.woff') format('woff');
+}
+
+body {
+    font-family: 'pixel';
+    background-color: #bce4d5;
+}
