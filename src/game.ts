@@ -242,8 +242,6 @@ export default class Demo extends Phaser.Scene {
                     hero.goUp();
                 }
             } else if (input.keyboard.checkDown(cursors.down, 500)) {
-                this.setGameState('win');
-                return true;
                 const down = getDown(hero.islandCoord, hero.coord);
                 if (gridManager.get(down.islandCoord, down.coord)) {
                     hero.goDown();
