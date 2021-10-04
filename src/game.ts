@@ -66,10 +66,11 @@ export default class Demo extends Phaser.Scene {
     create() {
         score = 0;
 
-        this.gridManager = new GridManager(this)
-            .createIslandGrids({ x: 0, y: 0 });
+        this.gridManager = new GridManager(this);
 
         this.islandManager = new IslandManager(this, this.gridManager);
+
+        this.gridManager.createIslandGrids({ x: 0, y: 0 });
 
         this.soundEffects = new SoundEffects(this.sound);
 
