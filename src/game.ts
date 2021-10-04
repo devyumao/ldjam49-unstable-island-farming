@@ -46,6 +46,10 @@ export default class Demo extends Phaser.Scene {
             .forEach(name => {
                 this.load.audio(name, `assets/audio/${name}.mp3`);
             });
+
+        // setTimeout(() => {
+            this.load.image('win', 'assets/start.png');
+        // }, 3000);
     }
 
     create() {
@@ -195,6 +199,10 @@ export default class Demo extends Phaser.Scene {
                 }
             }
         }
+    }
+
+    win() {
+        this.add.image(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 'win');
     }
 }
 

@@ -65,6 +65,12 @@ export default class Hero extends Phaser.GameObjects.Sprite {
             frameRate: 12,
             repeat: 0
         });
+        anims.create({
+            key: 'applause',
+            frames: anims.generateFrameNumbers('hero', { frames: [25, 26, 27] }),
+            frameRate: 12,
+            repeat: -1
+        });
 
         const busyActions = ['jump', 'plow', 'sow', 'water', 'reap'];
         this.on(Phaser.Animations.Events.ANIMATION_START, (anim: any) => {
@@ -123,6 +129,11 @@ export default class Hero extends Phaser.GameObjects.Sprite {
     private jump() {
         this.soundEffects.play('jump');
         return this.play({ key: 'jump' });
+    }
+
+    private applause() {
+        this.soundEffects.play('applause');
+        return this.play({ key: 'applause' });
     }
 
     private do({
