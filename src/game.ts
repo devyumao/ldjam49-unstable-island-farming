@@ -1,6 +1,6 @@
 import 'phaser';
 
-import { BEAT_SEQUENCE_000, CANVAS_HEIGHT, CANVAS_WIDTH, CARROT_WIN_COUNT, ISLAND_HEIGHT, ISLAND_UNLOCKS, ISLAND_UNLOCK_COORDS, OUT_GAME_UI_DEPTH, TILE_SIZE } from './constant';
+import { BEAT_SEQUENCE_000, CANVAS_HEIGHT, CANVAS_WIDTH, CARROT_PARTICLE_DEPTH, CARROT_WIN_COUNT, ISLAND_UNLOCKS, ISLAND_UNLOCK_COORDS, OUT_GAME_UI_CONTENT_DEPTH, OUT_GAME_UI_DEPTH } from './constant';
 import GridManager from './GridManager';
 import { SoundEffects } from './SoundEffect';
 import Hero from './Hero';
@@ -32,6 +32,8 @@ export default class Demo extends Phaser.Scene {
     scoreText: Phaser.GameObjects.Text;
     unlockIsandText: Phaser.GameObjects.Text;
     unlockIsandHintText: Phaser.GameObjects.Text;
+    carrotParticles: Phaser.GameObjects.Particles.ParticleEmitterManager;
+    applauseHero: Phaser.GameObjects.Sprite;
 
     constructor() {
         super('demo');
@@ -82,6 +84,26 @@ export default class Demo extends Phaser.Scene {
             music: this.sound.add('music', { loop: true })
         });
 
+        this.beforeGameImg = this.add
+            .image(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 'start')
+            .setDepth(OUT_GAME_UI_DEPTH)
+            .setScrollFactor(0);
+
+        this.carrotParticles = this.add.particles('carrot', 8, [{
+            x: CANVAS_WIDTH,
+            y: CANVAS_HEIGHT,
+            angle: {min: -90, max: 90},
+            speedX: {min: -1000, max: -100},
+            speedY: {min: -1500, max: -300},
+            gravityY: 800,
+            lifespan: 3000,
+            quantity: 6,
+            scale: {min: 0.2, max: 6},
+            rotate: {min: -180, max: 180}
+        }])
+            .setDepth(CARROT_PARTICLE_DEPTH);
+            this.carrotParticles.emitters.getAt(0).stop();
+
         this.initScore();
 
         this.initInput();
@@ -104,23 +126,26 @@ export default class Demo extends Phaser.Scene {
             return;
         }
 
+        this.carrotParticles.emitters.getAt(0).stop();
+
         switch (state) {
             case 'before_game':
-                if (this.afterGameImg) {
-                    this.afterGameImg.destroy();
-                    this.afterGameImg = null;
-                }
-                this.beforeGameImg = this.add
-                    .image(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 'start')
-                    .setDepth(OUT_GAME_UI_DEPTH)
-                    .setScrollFactor(0);
-                    break;
+                this.soundEffects.stop('applause');
+                this.rhythmBoard.stop();
+                break;
 
             case 'in_game':
                 if (this.beforeGameImg) {
                     this.beforeGameImg.destroy();
                     this.beforeGameImg = null;
                 }
+                this.rhythmBoard.start();
+                this.islandManager.animate();
+
+                this.carrotParticles.emitters.getAt(0).start();
+                setTimeout(() => {
+                    this.carrotParticles.emitters.getAt(0).stop();
+                }, 200);
                 break;
 
             case 'win':
@@ -128,7 +153,31 @@ export default class Demo extends Phaser.Scene {
                     .image(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 'win')
                     .setDepth(OUT_GAME_UI_DEPTH)
                     .setScrollFactor(0);
-                    break;
+
+                this.applauseHero = this.add.sprite(
+                    CANVAS_WIDTH * 0.4,
+                    CANVAS_HEIGHT * 0.58,
+                    'hero',
+                    25
+                )
+                    .setScale(6)
+                    .setDepth(OUT_GAME_UI_CONTENT_DEPTH);
+                this.anims.create({
+                    key: 'applause',
+                    frames: this.anims.generateFrameNumbers('hero', { frames: [25, 26, 27] }),
+                    frameRate: 15,
+                    repeat: -1
+                });
+                this.applauseHero.play('applause');
+
+                this.soundEffects.play('wow');
+                this.soundEffects.play('applause');
+
+                this.carrotParticles.emitters.getAt(0).start();
+                setTimeout(() => {
+                    this.carrotParticles.emitters.getAt(0).stop();
+                }, 2000);
+                break;
         }
         gameState = state;
     }
@@ -191,12 +240,6 @@ export default class Demo extends Phaser.Scene {
     update(time, delta) {
         const { input, cursors, hero, rhythmBoard, gridManager, islandManager } = this;
 
-        if (input.keyboard.checkDown(cursors.shift, 1000)) {
-            // TODO: for debug
-            rhythmBoard.play();
-            islandManager.animate();
-        }
-
         if (!hero.busy) {
             let direction;
             const originIslandCoord = { ...hero.islandCoord };
@@ -228,7 +271,7 @@ export default class Demo extends Phaser.Scene {
             }
 
             const grid = gridManager.get(hero.islandCoord, hero.coord);
-            if (grid) {
+            if (grid && gameState !== 'before_game') {
                 const avalableActions = grid.getAvailableActions();
                 rhythmBoard.updateBeatsAvailable(avalableActions);
             }
@@ -239,6 +282,7 @@ export default class Demo extends Phaser.Scene {
                     return;
                 }
                 if (gameState === 'win') {
+                    this.setGameState('before_game');
                     this.scene.restart();
                     return;
                 }
@@ -257,7 +301,7 @@ export default class Demo extends Phaser.Scene {
                                 grid.beInteracted(action);
                             });
                     } else {
-                        
+                        this.cameras.main.shake(200, 0.02);
                     }
                 }
             }

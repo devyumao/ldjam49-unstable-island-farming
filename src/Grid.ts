@@ -20,7 +20,7 @@ const PLANT_MATURE_AGE = {
 };
 
 const PLAT_AGE_DURATION = {
-    [PlantType.Carrot]: 100
+    [PlantType.Carrot]: 6000
 };
 
 export default class Grid {

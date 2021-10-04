@@ -30,11 +30,28 @@ export default class RhythmBoard {
         if (delayBeats != null) {
             this.delayBeats = delayBeats;
         }
+    }
+
+    start() {
         this.initBackground();
         this.initMask();
         this.initStave();
         this.initBeatBadgeGroup();
         this.initHitPointer();
+        this.play();
+    }
+
+    stop() {
+        if (!this.background) {
+            // first call
+            return;
+        }
+        this.music.stop();
+        this.background.destroy();
+        this.mask.destroy();
+        this.stave.destroy();
+        this.beatBadgeGroup.destroy();
+        this.hitPointer.destroy();
     }
 
     private initBackground() {
@@ -90,7 +107,7 @@ export default class RhythmBoard {
             .setScrollFactor(0);
     }
 
-    play() {
+    private play() {
         const unitTime = 6e4 / this.bps * 0.5;
 
         this.music.play();
