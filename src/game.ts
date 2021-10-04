@@ -171,6 +171,7 @@ export default class Demo extends Phaser.Scene {
             }
 
             if (input.keyboard.checkDown(cursors.space, 500)) {
+                rhythmBoard.animateHitPoint();
                 if (grid) {
                     const badge = rhythmBoard.getHitableBeat();
                     if (badge) {
@@ -181,6 +182,7 @@ export default class Demo extends Phaser.Scene {
                                 grid.beInteracted(action);
                             });
                     } else {
+                        
                     }
                 }
             }

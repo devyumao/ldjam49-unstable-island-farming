@@ -67,7 +67,7 @@ export default class IslandManager {
     animate() {
         this.islands.forEach(island => {
             this.scene.time.addEvent({
-                delay: 6e4 / 120 * 0.5,
+                delay: 6e4 / 120 * 2,
                 loop: true,
                 callback: () => {
                     island.randomize(2, 0, 4, 1, [2, 3, 50]);
@@ -79,7 +79,7 @@ export default class IslandManager {
             });
     
             this.scene.time.addEvent({
-                delay: 6e4 / 120,
+                delay: 6e4 / 120 * 2,
                 loop: true,
                 callback: () => {
                     island.randomize(2, 9, 4, 1, [68, 69]);

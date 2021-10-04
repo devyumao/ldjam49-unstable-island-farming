@@ -13,8 +13,8 @@ export default class RhythmBoard {
     scene: Phaser.Scene;
     bps: number;
     sequence: IBeat[];
-    sequenceIndex = 0;
-    delayBeats: number = 8;
+    beatCount = 0;
+    delayBeats = 8;
     music: Phaser.Sound.BaseSound;
     background: Phaser.GameObjects.Rectangle;
     mask: Phaser.Display.Masks.GeometryMask;
@@ -35,7 +35,6 @@ export default class RhythmBoard {
         this.initStave();
         this.initBeatBadgeGroup();
         this.initHitPointer();
-
     }
 
     private initBackground() {
@@ -53,8 +52,8 @@ export default class RhythmBoard {
         shape.beginPath();
         shape.fillRect(
             scene.scale.width / 2 - background.width / 2,
-            background.y - background.height / 2,
-            background.width, background.height
+            background.y - 64,
+            background.width, 128
         )
         this.mask = shape.createGeometryMask();
         background.setMask(this.mask);
@@ -90,11 +89,24 @@ export default class RhythmBoard {
 
     play() {
         const unitTime = 6e4 / this.bps * 0.5;
+
         this.music.play();
+
+        // HACK
         this.createBeat();
+
         this.scene.time.addEvent({
             delay: unitTime,
             callback: () => this.createBeat(),
+            callbackScope: this,
+            loop: true
+        });
+        this.scene.time.addEvent({
+            startAt: 100,
+            delay: unitTime * 4,
+            callback: () => {
+                this.animateBeats();
+            },
             callbackScope: this,
             loop: true
         });
@@ -104,13 +116,15 @@ export default class RhythmBoard {
         const x = this.scene.scale.width * 0.5 + BEAT_BADGE_SPACING * this.delayBeats;
         const unitTime = 6e4 / this.bps * 0.5;
         const v = BEAT_BADGE_SPACING / unitTime;
-        const beat = this.sequence[this.sequenceIndex++ % this.sequence.length];
-        return this.beatBadgeGroup.get(x, this.background.y)
+        const beat = this.sequence[this.beatCount % this.sequence.length];
+        const badge =  this.beatBadgeGroup.get(x, this.background.y)
             ?.setActive(true)
             .setMask(this.mask)
             .set(beat)
             .setV(v)
-            .setHit(false);   
+            .setHit(false);
+        this.beatCount++;
+        return badge;
     }
 
     getHitableBeat() {
@@ -131,6 +145,30 @@ export default class RhythmBoard {
             if (badge.isBigType()) {
                 const available = availableActions.includes(badge.action);
                 badge.setAvailable(available);
+            }
+        });
+    }
+
+    private animateBeats() {
+        this.beatBadgeGroup.children.each((badge: BeatBadge) => {
+            this.scene.tweens.add({
+                targets: badge,
+                duration: 50,
+                yoyo: true,
+                props: {
+                    scale: 2.7
+                }
+            });
+        });
+    }
+
+    animateHitPoint() {
+        this.scene.tweens.add({
+            targets: this.hitPointer,
+            duration: 100,
+            yoyo: true,
+            props: {
+                scaleY: 1
             }
         });
     }
