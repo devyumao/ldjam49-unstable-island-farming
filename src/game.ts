@@ -6,8 +6,15 @@ import GridManager from './GridManager';
 import { SoundEffects } from './SoundEffect';
 import Hero from './Hero';
 
-let waveId = 0;
-const maxWaves = 5;
+const CANVAS_WIDTH = 1200;
+const CANVAS_HEIGHT = 750;
+
+const COLOR = {
+    PRIMARY: '#ae5e28',
+    PRIMARY_LIGHT: '#eb8b4a',
+    SECONDARY: '#48655a',
+    SECONDARY_LIGHT: '#5e8677'
+};
 
 const COLLISION_TILES = [
     0, 1, 2, 3, 4, 5,
@@ -57,6 +64,8 @@ export default class Demo extends Phaser.Scene {
         this.load.spritesheet('soil', 'assets/island-tiles-8.png', { frameWidth: 16, frameHeight: 16, margin: 8 });
         this.load.spritesheet('carrot', 'assets/carrot.png', { frameWidth: 16, frameHeight: 32 });
 
+        this.load.css('headers', 'assets/style.css');
+
         SoundEffects.names
             .forEach(name => {
                 this.load.audio(name, `assets/audio/${name}.mp3`);
@@ -78,6 +87,7 @@ export default class Demo extends Phaser.Scene {
 
         this.initInput();
         this.initRhythmBoard();
+        this.initScore();
 
         // this.renderDebug();
     }
@@ -183,6 +193,53 @@ export default class Demo extends Phaser.Scene {
         );
     }
 
+    initScore() {
+        this.add.text(
+            CANVAS_WIDTH - 130,
+            30,
+            '  0/100',
+            {
+                fontSize: '24px',
+                fontFamily: 'pixel',
+                color: COLOR.PRIMARY_LIGHT,
+                stroke: COLOR.PRIMARY,
+                strokeThickness: 5,
+                align: 'left'
+            }
+        );
+        this.add.text(
+            CANVAS_WIDTH - 135,
+            70,
+            '4 MORE',
+            {
+                fontSize: '30px',
+                fontFamily: 'pixel',
+                color: COLOR.SECONDARY,
+                align: 'left'
+            }
+        ).setResolution(4);
+
+        this.add.text(
+            CANVAS_WIDTH - 165,
+            105,
+            'BEFORE NEXT ISLAND',
+            {
+                fontSize: '20px',
+                fontFamily: 'pixel',
+                color: COLOR.SECONDARY_LIGHT,
+                align: 'left'
+            }
+        ).setResolution(4);
+
+        this.add.sprite(
+            CANVAS_WIDTH - 155,
+            22,
+            'carrot',
+            6
+        )
+            .setScale(3);
+    }
+
     update(time, delta) {
         const { input, cursors, hero } = this;
 
@@ -270,8 +327,8 @@ export default class Demo extends Phaser.Scene {
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     backgroundColor: '#000000',
-    width: 1200,
-    height: 750,
+    width: CANVAS_WIDTH,
+    height: CANVAS_HEIGHT,
     pixelArt: true,
     scale: {
         mode: Phaser.Scale.ScaleModes.FIT,
