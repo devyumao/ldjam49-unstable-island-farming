@@ -172,14 +172,16 @@ export default class RhythmBoard {
 
     private animateBeats() {
         this.beatBadgeGroup.children.each((badge: BeatBadge) => {
-            this.scene.tweens.add({
-                targets: badge,
-                duration: 50,
-                yoyo: true,
-                props: {
-                    scale: 2.7
-                }
-            });
+            if (!badge.isBigType() || badge.available) {
+                this.scene.tweens.add({
+                    targets: badge,
+                    duration: 50,
+                    yoyo: true,
+                    props: {
+                        scale: 2.7
+                    }
+                });
+            }
         });
     }
 
