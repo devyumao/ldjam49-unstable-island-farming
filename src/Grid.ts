@@ -1,14 +1,16 @@
-import { GRID_PER_ISLAND_SIDE, GRID_SIZE, ISLAND_INNER_SIZE, PLANT_BASE_DEPTH, SoilState } from './constant';
+import {
+    GRID_PER_ISLAND_SIDE,
+    GRID_SIZE,
+    ISLAND_INNER_SIZE,
+    PLANT_BASE_DEPTH
+} from './constant';
+import { ActionType, ICoord, PlantType, SoilState } from './type'
 
 const SOIL_STATE_FRAME = {
     [SoilState.Virgin]: 0,
     [SoilState.Plowed]: 1,
     [SoilState.Watered]: 2
 };
-
-enum PlantType {
-    Carrot = 'carrot'
-}
 
 const PLANT_MATURE_AGE = {
     [PlantType.Carrot]: 5
@@ -148,6 +150,25 @@ export default class Grid {
 
     hasPlant() {
         return this.plantAge !== -1;
+    }
+
+    getAvailableActions() {
+        switch (this.soilState) {
+            case SoilState.Virgin:
+                return [ActionType.Plow];
+            case SoilState.Plowed:
+                return [ActionType.Water, ActionType.Sow];
+            case SoilState.Watered:
+                if (!this.hasPlant()) {
+                    return [ActionType.Sow];
+                }
+                if (this.isMature()) {
+                    return [ActionType.Reap];
+                }
+                return [];
+            default:
+                return [];
+        }
     }
 
     private setSoilState(state: SoilState) {

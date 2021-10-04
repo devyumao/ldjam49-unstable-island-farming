@@ -1,5 +1,6 @@
 import { GRID_PER_ISLAND_SIDE } from './constant';
 import Grid from './Grid';
+import { ICoord } from './type';
 import { fromCoord } from './utils';
 
 export default class GridManager {

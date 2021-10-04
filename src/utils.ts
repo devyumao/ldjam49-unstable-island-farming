@@ -1,3 +1,5 @@
+import { ICoord } from "./type";
+
 export function fromCoord(coord: ICoord) {
     return [coord.x, coord.y].join(',');
 }
@@ -9,4 +11,3 @@ export function toCoord(str: string) {
         y: arr[1]
     };
 }
-

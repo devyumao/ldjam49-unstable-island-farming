@@ -1,48 +1,29 @@
 import 'phaser';
 
-import ActionBadge from './ActionBadge';
-import { TILE_SIZE } from './constant';
+import { BEAT_SEQUENCE_000, TILE_SIZE } from './constant';
 import GridManager from './GridManager';
 import { SoundEffects } from './SoundEffect';
 import Hero from './Hero';
+import RhythmBoard from './RhythmBoard';
 
-
-const COLLISION_TILES = [
-    0, 1, 2, 3, 4, 5,
-    6, 11,
-    12, 17,
-    18, 23,
-    24, 29,
-    30, 31, 32, 33, 34, 35,
-    36, 37, 38, 39, 40, 41
-];
-
-enum ActionKey {
-    Pow = 'plow',
-    Sow = 'sow',
-    Water = 'water',
-    Reap = 'reap'
-}
-
-const rhythm = {
-    bps: 72,
-    sequence: [
-        { key: ActionKey.Pow, start: 5 },
-        { key: ActionKey.Sow, start: 9 },
-        { key: ActionKey.Water, start: 13 },
-        { key: ActionKey.Reap, start: 17 }
-    ]
-};
-
-
+// const rhythm = {
+//     bps: 72,
+//     sequence: [
+//         { key: ActionKey.Pow, start: 5 },
+//         { key: ActionKey.Sow, start: 9 },
+//         { key: ActionKey.Water, start: 13 },
+//         { key: ActionKey.Reap, start: 17 }
+//     ]
+// };
 
 export default class Demo extends Phaser.Scene {
     map: Phaser.Tilemaps.Tilemap;
+    tiles: Phaser.Tilemaps.Tileset;
     layer: Phaser.Tilemaps.TilemapLayer;
     hero: Hero;
     cursors: Phaser.Types.Input.Keyboard.CursorKeys;
-    actionBadges: Phaser.GameObjects.Group;
     gridManager: GridManager;
+    rhythmBoard: RhythmBoard;
     soundEffects: SoundEffects;
 
     constructor() {
@@ -54,6 +35,11 @@ export default class Demo extends Phaser.Scene {
         this.load.spritesheet('hero', 'assets/hero.png', { frameWidth: 16, frameHeight: 32 });
         this.load.spritesheet('soil', 'assets/island-tiles-8.png', { frameWidth: 16, frameHeight: 16, margin: 8 });
         this.load.spritesheet('carrot', 'assets/carrot.png', { frameWidth: 16, frameHeight: 32 });
+        this.load.spritesheet('beat', 'assets/ui.png', { frameWidth: 32, frameHeight: 32, endFrame: 1 });
+        this.load.spritesheet('beatSmall', 'assets/ui.png', { frameWidth: 16, frameHeight: 16, startFrame: 12, endFrame: 12  });
+        this.load.spritesheet('hitPointer', 'assets/ui.png', { frameWidth: 2, frameHeight: 32, startFrame: 56, endFrame: 56 });
+        this.load.spritesheet('stave', 'assets/ui.png', { frameWidth: 8, frameHeight: 8, startFrame: 8, endFrame: 8 });
+        this.load.spritesheet('actionIcon', 'assets/ui.png', { frameWidth: 16, frameHeight: 16 });
 
         SoundEffects.names
             .forEach(name => {
@@ -74,8 +60,9 @@ export default class Demo extends Phaser.Scene {
             coord: { x: 1, y: 1 }
         });
 
+        this.rhythmBoard = new RhythmBoard(this, { bps: 72, sequence: BEAT_SEQUENCE_000 });
+
         this.initInput();
-        this.initRhythmBoard();
 
         // this.renderDebug();
     }
@@ -87,15 +74,20 @@ export default class Demo extends Phaser.Scene {
             width: 50,
             height: 50
         });
-        const tiles = map.addTilesetImage('tiles', null, 8, 8, 0, 0);
-        const layer = map.createBlankLayer(
-            'layer',
-            tiles,
+        this.tiles = map.addTilesetImage('tiles', null, 8, 8, 0, 0);
+        this.map = map;
+        this.createLayer(0, 0);
+    }
+
+    createLayer(x: number, y: number) {
+        const layer = this.map.createBlankLayer(
+            `layer-${x}-${y}`,
+            this.tiles,
             // this.scale.width / 2 - map.tileWidth * 3 / 2,
             // this.scale.height / 2 - map.tileHeight * 3 / 2
-            0, 0
+            x, y
         );
-        this.map = map;
+        
         this.layer = layer;
 
         layer.fill(21);
@@ -128,59 +120,8 @@ export default class Demo extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
     }
 
-    initRhythmBoard() {
-        const background =  this.add.rectangle(
-            this.scale.width / 2, 680,
-            800, 80,
-            0xffffff, 0.75
-        );
-
-        const actionBadges = this.add.group({
-            classType: ActionBadge,
-            maxSize: 10,
-            runChildUpdate: true
-        });
-        this.actionBadges = actionBadges;
-
-        const shape = this.make.graphics({});
-        shape.fillStyle(0xffffff);
-        shape.beginPath();
-        shape.fillRect(
-            this.scale.width / 2 - background.width / 2,
-            background.y - background.height / 2,
-            background.width, background.height
-        )
-        const mask = shape.createGeometryMask();
-        background.setMask(mask);
-
-        const scaleWidth = this.scale.width;
-        const createActionBadge = () => {
-            const badge: ActionBadge = actionBadges.get(
-                // this.scale.width / 2 + v * (2 * 6e4 / rhythm.bps),
-                scaleWidth / 2 + background.width / 2,
-                background.y,
-                'tiles'
-            );
-            badge.setActive(true);
-            badge.setMask(mask);
-        }
-        createActionBadge();
-        this.time.addEvent({
-            delay: 6e4 / rhythm.bps * 2,
-            callback: () => { createActionBadge(); },
-            callbackScope: this,
-            loop: true
-        });
-
-        const pointer = this.add.rectangle(
-            this.scale.width / 2, 680,
-            10, 90,
-            0x000000, 0.5
-        );
-    }
-
     update(time, delta) {
-        const { input, cursors, hero } = this;
+        const { input, cursors, hero, rhythmBoard } = this;
 
         if (input.keyboard.checkDown(cursors.left, 200)
             && !this.isBlockedByLayer(hero.x - TILE_SIZE * 2, hero.y)
@@ -200,38 +141,27 @@ export default class Demo extends Phaser.Scene {
             hero.goDown();
         }
 
-        if (input.keyboard.checkDown(cursors.space, 500)) {
-            const badge = this.getAvailableActionBadge();
-            if (badge) {
-                badge.setData('hit', true);
-            }
+        const grid = this.gridManager.get(hero.islandCoord, hero.coord);
+        if (grid) {
+            const avalableActions = grid.getAvailableActions();
+            rhythmBoard.updateBeatsAvailable(avalableActions);
+        }
 
-            const grid = this.gridManager.get(hero.islandCoord, hero.coord);
+        if (input.keyboard.checkDown(cursors.space, 500)) {
             if (grid) {
-                hero.interact(grid)
-                    .then(() => {
-                        grid.beInteracted();
-                    });
+                const badge = rhythmBoard.getHitableBeat();
+                console.log(badge);
+                if (badge) {
+                    badge.setHit(true);
+                    hero.interact(grid)
+                        .then(() => {
+                            grid.beInteracted();
+                        });
+                } else {
+
+                }
             }
         }
-    }
-
-    getAvailableActionBadge() {
-        return this.actionBadges.children.getArray().reduce((prev: ActionBadge | null, curr: ActionBadge) => {
-            if (curr.getData('hit')) {
-                return prev;
-            }
-            const currDistance = Math.abs(curr.x - this.scale.width / 2);
-            if (currDistance > ActionBadge.MAX_HIT_DISTANCE) {
-                return prev;
-            }
-            if (!prev) {
-                return curr;
-            }
-            return (currDistance < Math.abs(prev.x - this.scale.width / 2))
-                ? curr
-                : prev;
-        }, null) as (ActionBadge | null);
     }
 
     isBlockedByLayer(x: number, y: number) {

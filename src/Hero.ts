@@ -1,6 +1,7 @@
-import { GRID_PER_ISLAND_SIDE, GRID_SIZE, HERO_BASE_DEPTH, ISLAND_INNER_SIZE, SoilState } from './constant';
+import { GRID_PER_ISLAND_SIDE, GRID_SIZE, HERO_BASE_DEPTH, ISLAND_INNER_SIZE } from './constant';
 import Grid from './Grid';
 import { SoundEffects } from './SoundEffect';
+import { ICoord, SoilState } from './type';
 
 const HERO_MOVE_DURATION = 150;
 
