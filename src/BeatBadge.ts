@@ -81,12 +81,14 @@ export default class BeatBadge extends Phaser.GameObjects.Image {
         this.icon = this.scene.add.image(this.x, this.y, 'actionIcon', this.getIconFrame(action))
             .setScale(2)
             .setMask(this.mask)
-            .setScrollFactor(0);
+            .setScrollFactor(0)
+            .setDepth(this.depth);
     }
 
     private showIcon(action: ActionType) {
-        this.icon.setFrame(this.getIconFrame(action));
-        this.icon.setVisible(true);
+        this.icon
+            .setFrame(this.getIconFrame(action))
+            .setVisible(true);
     }
 
     private getIconFrame(action: ActionType) {
@@ -126,5 +128,7 @@ export default class BeatBadge extends Phaser.GameObjects.Image {
                 this.setAlpha(0.7);
                 break;
         }
+
+        this.icon?.setScale(this.scaleX);
     }
 }

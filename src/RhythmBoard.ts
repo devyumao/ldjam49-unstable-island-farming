@@ -1,5 +1,5 @@
 import BeatBadge from './BeatBadge';
-import { BEAT_BADGE_DEPTH, BEAT_BADGE_SPACING, HIT_POINTER_DEPTH } from './constant';
+import { BEAT_BADGE_DEPTH, BEAT_BADGE_SPACING, HIT_POINTER_DEPTH, RHYTHM_BOARD_DEPTH } from './constant';
 import { ActionType, IBeat } from './type';
 
 export interface IRhythmBoardConfig {
@@ -60,7 +60,8 @@ export default class RhythmBoard {
             800, 64,
             0xffffff, 0
         )
-            .setScrollFactor(0);
+            .setScrollFactor(0)
+            .setDepth(RHYTHM_BOARD_DEPTH);
     }
 
     private initMask() {
@@ -84,7 +85,8 @@ export default class RhythmBoard {
         )
             .setScale(100, 4)
             .setAlpha(0.7)
-            .setScrollFactor(0);
+            .setScrollFactor(0)
+            .setDepth(RHYTHM_BOARD_DEPTH);;
     }
 
     private initBeatBadgeGroup() {
@@ -92,8 +94,7 @@ export default class RhythmBoard {
             classType: BeatBadge,
             maxSize: 40,
             runChildUpdate: true
-        })
-            .setDepth(BEAT_BADGE_DEPTH);
+        });
     }
 
     private initHitPointer() {
@@ -137,10 +138,11 @@ export default class RhythmBoard {
         const unitTime = 6e4 / this.bps * 0.5;
         const v = BEAT_BADGE_SPACING / unitTime;
         const beat = this.sequence[this.beatCount % this.sequence.length];
-        const badge =  this.beatBadgeGroup.get(x, this.background.y)
+        const badge = this.beatBadgeGroup.get(x, this.background.y)
             ?.setActive(true)
             .setMask(this.mask)
             .setScrollFactor(0)
+            .setDepth(BEAT_BADGE_DEPTH)
             .set(beat)
             .setV(v)
             .setHit(false);

@@ -5,7 +5,8 @@ import {
     GRID_SIZE,
     ISLAND_INNER_SIZE,
     ISLAND_WIDTH,
-    PLANT_BASE_DEPTH
+    PLANT_BASE_DEPTH,
+    SOIL_BASE_DEPTH
 } from './constant';
 import { ActionType, ICoord, PlantType, SoilState } from './type'
 
@@ -22,6 +23,7 @@ const PLANT_MATURE_AGE = {
 
 const PLAT_AGE_DURATION = {
     [PlantType.Carrot]: 6000
+    // [PlantType.Carrot]: 100
 };
 
 const PLANT_UP_HEIGHT = 130;
@@ -54,11 +56,11 @@ export default class Grid {
             'soil',
             SOIL_STATE_FRAME[this.soilState]
         )
-            .setScale(4);
+            .setScale(4)
+            .setDepth(SOIL_BASE_DEPTH + (GRID_PER_ISLAND_SIDE * this.islandCoord.y + this.coord.y) * 2);
     }
 
     private initPlant() {
-        const { islandCoord, coord } = this;
         this.plant = this.scene.add.sprite(
             this.calcX(),
             this.calcY(),
@@ -68,7 +70,7 @@ export default class Grid {
             .setAlpha(0)
             .setScale(4)
             .setOrigin(0.5, 0.75)
-            .setDepth(PLANT_BASE_DEPTH + (GRID_PER_ISLAND_SIDE * islandCoord.y + coord.y) * 2);
+            .setDepth(PLANT_BASE_DEPTH + (GRID_PER_ISLAND_SIDE * this.islandCoord.y + this.coord.y) * 2);
     }
 
     private calcX() {

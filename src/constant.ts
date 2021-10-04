@@ -16,9 +16,10 @@ export const GRID_PER_ISLAND_SIDE = 3;
 
 export const CENTER_GRID_Y = 350;
 
+export const SOIL_BASE_DEPTH = 990;
 export const HERO_BASE_DEPTH = 999;
 export const PLANT_BASE_DEPTH = 1000;
-export const RHYTHMBOARD = 4090;
+export const RHYTHM_BOARD_DEPTH = 4090;
 export const BEAT_BADGE_DEPTH = 5000;
 export const HIT_POINTER_DEPTH = 5010;
 export const OUT_GAME_UI_DEPTH = 10000;
