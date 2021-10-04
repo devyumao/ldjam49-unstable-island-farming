@@ -1,4 +1,5 @@
-import { CANVAS_HALF_WIDTH, CENTER_GRID_Y, GRID_PER_ISLAND_SIDE, GRID_SIZE, ISLAND_HEIGHT, ISLAND_INNER_SIZE, ISLAND_WIDTH, TILE_SIZE } from './constant';
+import { CANVAS_HALF_WIDTH, CENTER_GRID_Y, ISLAND_WIDTH, TILE_SIZE } from './constant';
+import GridManager from './GridManager';
 import { ICoord } from './type';
 import { fromCoord } from './utils';
 
@@ -6,12 +7,15 @@ export default class IslandManager {
     map: Phaser.Tilemaps.Tilemap;
     tiles: Phaser.Tilemaps.Tileset;
     scene: Phaser.Scene;
-    islands: Phaser.Tilemaps.TilemapLayer[] = [];
-    // islands: { [coord: string]: Phaser.Tilemaps.TilemapLayer } = {};
+    gridManager: GridManager;
+    // islands: Phaser.Tilemaps.TilemapLayer[] = [];
+    islands: { [coord: string]: Phaser.Tilemaps.TilemapLayer } = {};
 
-    constructor(scene: Phaser.Scene) {
+    constructor(scene: Phaser.Scene, gridManager: GridManager) {
         this.scene = scene;
+        this.gridManager = gridManager;
         this.initMap();
+        this.initIslands();
     }
 
     initMap() {
@@ -22,6 +26,20 @@ export default class IslandManager {
             height: 10
         });
         this.tiles = this.map.addTilesetImage('tiles', null, 8, 8, 0, 0);
+    }
+
+    initIslands() {
+        this.create({ x: -1, y: -1 }).setVisible(false);
+        this.create({ x: 0, y: -1 }).setVisible(false);
+        this.create({ x: 1, y: -1 }).setVisible(false);
+
+        this.create({ x: -1, y: 0 }).setVisible(false);
+        this.create({ x: 0, y: 0 });
+        this.create({ x: 1, y: 0 }).setVisible(false);
+
+        this.create({ x: -1, y: 1 }).setVisible(false);
+        this.create({ x: 0, y: 1 }).setVisible(false);
+        this.create({ x: 1, y: 1 }).setVisible(false);
     }
 
     create(coord: ICoord) {
@@ -59,13 +77,31 @@ export default class IslandManager {
         layer.randomize(2, 8, 4, 1, [38, 39, 52]);
         layer.randomize(2, 9, 4, 1, [68, 69]);
 
-        this.islands.push(layer);
+        this.islands[fromCoord(coord)] = layer;
 
-        return this;
+        return layer;
+    }
+
+    get(coord: ICoord) {
+        return this.islands[fromCoord(coord)];
+    }
+
+    unlock(coord: ICoord) {
+        const island = this.get(coord).setVisible(true);
+        island.setAlpha(0).setY(island.y + 20);
+        this.scene.tweens.add({
+            targets: island,
+            duration: 300,
+            props: { alpha: 1, y: island.y - 20 },
+            onComplete: () => {
+                this.gridManager.createIslandGrids(coord);
+            }
+        });
+        return island;
     }
 
     animate() {
-        this.islands.forEach(island => {
+        Object.values(this.islands).forEach(island => {
             this.scene.time.addEvent({
                 delay: 6e4 / 120 * 2,
                 loop: true,
