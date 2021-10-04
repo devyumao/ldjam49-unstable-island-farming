@@ -21,6 +21,7 @@ export const PLANT_BASE_DEPTH = 1000;
 export const RHYTHMBOARD = 4090;
 export const BEAT_BADGE_DEPTH = 5000;
 export const HIT_POINTER_DEPTH = 5010;
+export const SCORE_DEPTH = 2000;
 export const OUT_GAME_UI_DEPTH = 10000;
 export const OUT_GAME_UI_CONTENT_DEPTH = 11000;
 export const CARROT_PARTICLE_DEPTH = 12000;
