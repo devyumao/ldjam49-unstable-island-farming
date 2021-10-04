@@ -1,6 +1,6 @@
 import 'phaser';
 
-import { BEAT_SEQUENCE_000, CANVAS_HEIGHT, CANVAS_WIDTH, CARROT_PARTICLE_DEPTH, CARROT_WIN_COUNT, ISLAND_UNLOCKS, ISLAND_UNLOCK_COORDS, OUT_GAME_UI_CONTENT_DEPTH, OUT_GAME_UI_DEPTH } from './constant';
+import { BEAT_SEQUENCE_000, CANVAS_HEIGHT, CANVAS_WIDTH, CARROT_PARTICLE_DEPTH, CARROT_WIN_COUNT, ISLAND_UNLOCKS, ISLAND_UNLOCK_COORDS, OUT_GAME_UI_CONTENT_DEPTH, OUT_GAME_UI_DEPTH, SCORE_DEPTH } from './constant';
 import GridManager from './GridManager';
 import { SoundEffects } from './SoundEffect';
 import Hero from './Hero';
@@ -182,8 +182,9 @@ export default class Demo extends Phaser.Scene {
                     this.carrotParticles.emitters.getAt(0).stop();
                 }, 2000);
                 break;
-            
+
             case 'lose':
+                this.rhythmBoard.end();
                 setTimeout(() => {
                     this.add.image(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 'lose')
                         .setDepth(OUT_GAME_UI_DEPTH)
@@ -212,7 +213,8 @@ export default class Demo extends Phaser.Scene {
             }
         )
             .setResolution(4)
-            .setScrollFactor(0);
+            .setScrollFactor(0)
+            .setDepth(SCORE_DEPTH);
 
         this.unlockIsandText = this.add.text(
             CANVAS_WIDTH - 135,
@@ -226,7 +228,8 @@ export default class Demo extends Phaser.Scene {
             }
         )
             .setResolution(4)
-            .setScrollFactor(0);
+            .setScrollFactor(0)
+            .setDepth(SCORE_DEPTH);
 
         this.unlockIsandHintText = this.add.text(
             CANVAS_WIDTH - 150,
@@ -240,7 +243,8 @@ export default class Demo extends Phaser.Scene {
             }
         )
             .setResolution(4)
-            .setScrollFactor(0);
+            .setScrollFactor(0)
+            .setDepth(SCORE_DEPTH);
 
         this.add.sprite(
             CANVAS_WIDTH - 135,
@@ -249,7 +253,8 @@ export default class Demo extends Phaser.Scene {
             6
         )
             .setScale(3)
-            .setScrollFactor(0);;
+            .setScrollFactor(0)
+            .setDepth(SCORE_DEPTH);
     }
 
     update(time, delta) {
