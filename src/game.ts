@@ -1,6 +1,6 @@
 import 'phaser';
 
-import { BEAT_SEQUENCE_000, CANVAS_HEIGHT, CANVAS_WIDTH, CARROT_WIN_COUNT, ISLAND_UNLOCKS, OUT_GAME_UI_DEPTH } from './constant';
+import { BEAT_SEQUENCE_000, CANVAS_HEIGHT, CANVAS_WIDTH, CARROT_WIN_COUNT, ISLAND_UNLOCKS, ISLAND_UNLOCK_COORDS, OUT_GAME_UI_DEPTH } from './constant';
 import GridManager from './GridManager';
 import { SoundEffects } from './SoundEffect';
 import Hero from './Hero';
@@ -64,19 +64,10 @@ export default class Demo extends Phaser.Scene {
     create() {
         score = 0;
 
-        this.islandManager = new IslandManager(this)
-            .create({ x: 0, y: -1 })
-            .create({ x: -1, y: 0 })
-            .create({ x: 0, y: 0 })
-            .create({ x: 1, y: 0 })
-            .create({ x: 0, y: 1 });
-
         this.gridManager = new GridManager(this)
-            .createIslandGrids({ x: 0, y: -1 })
-            .createIslandGrids({ x: -1, y: 0 })
-            .createIslandGrids({ x: 0, y: 0 })
-            .createIslandGrids({ x: 1, y: 0 })
-            .createIslandGrids({ x: 0, y: 1 });
+            .createIslandGrids({ x: 0, y: 0 });
+
+        this.islandManager = new IslandManager(this, this.gridManager);
 
         this.soundEffects = new SoundEffects(this.sound);
 
@@ -254,7 +245,7 @@ export default class Demo extends Phaser.Scene {
         for (let i = ISLAND_UNLOCKS.length - 1; i >= 0; --i) {
             if (i === 0 || ISLAND_UNLOCKS[i - 1] < newScore) {
                 if (ISLAND_UNLOCKS[i] === newScore) {
-                    // TODO: unlock an island
+                    this.islandManager.unlock(ISLAND_UNLOCK_COORDS[i]);
 
                     if (i < ISLAND_UNLOCKS.length - 1) {
                         hasMoreUnlock = true;
