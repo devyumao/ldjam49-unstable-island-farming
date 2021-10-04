@@ -1,6 +1,6 @@
 import 'phaser';
 
-import { BEAT_SEQUENCE_000, CANVAS_HEIGHT, CANVAS_WIDTH, OUT_GAME_UI_DEPTH } from './constant';
+import { BEAT_SEQUENCE_000, CANVAS_HEIGHT, CANVAS_WIDTH, CARROT_WIN_COUNT, ISLAND_UNLOCKS, OUT_GAME_UI_DEPTH } from './constant';
 import GridManager from './GridManager';
 import { SoundEffects } from './SoundEffect';
 import Hero from './Hero';
@@ -29,6 +29,9 @@ export default class Demo extends Phaser.Scene {
     soundEffects: SoundEffects;
     beforeGameImg: Phaser.GameObjects.Image;
     afterGameImg: Phaser.GameObjects.Image;
+    scoreText: Phaser.GameObjects.Text;
+    unlockIsandText: Phaser.GameObjects.Text;
+    unlockIsandHintText: Phaser.GameObjects.Text;
 
     constructor() {
         super('demo');
@@ -47,7 +50,7 @@ export default class Demo extends Phaser.Scene {
 
         this.load.css('headers', 'assets/style.css');
 
-        this.load.audio('music', 'assets/audio/music.wav');
+        this.load.audio('music', 'assets/audio/music.mp3');
 
         SoundEffects.names
             .forEach(name => {
@@ -132,10 +135,10 @@ export default class Demo extends Phaser.Scene {
     }
 
     initScore() {
-        this.add.text(
+        this.scoreText = this.add.text(
             CANVAS_WIDTH - 130,
             30,
-            '  0/100',
+            '0/' + CARROT_WIN_COUNT,
             {
                 fontSize: '24px',
                 fontFamily: 'pixel',
@@ -144,11 +147,12 @@ export default class Demo extends Phaser.Scene {
                 strokeThickness: 5,
                 align: 'left'
             }
-        );
-        this.add.text(
+        ).setResolution(4);
+
+        this.unlockIsandText = this.add.text(
             CANVAS_WIDTH - 135,
             70,
-            '4 MORE',
+            ISLAND_UNLOCKS[0] + ' MORE',
             {
                 fontSize: '30px',
                 fontFamily: 'pixel',
@@ -157,10 +161,10 @@ export default class Demo extends Phaser.Scene {
             }
         ).setResolution(4);
 
-        this.add.text(
-            CANVAS_WIDTH - 165,
+        this.unlockIsandHintText = this.add.text(
+            CANVAS_WIDTH - 150,
             105,
-            'BEFORE NEXT ISLAND',
+            'TO UNLOCK ISLAND',
             {
                 fontSize: '20px',
                 fontFamily: 'pixel',
@@ -229,6 +233,10 @@ export default class Demo extends Phaser.Scene {
                     if (badge) {
                         badge.beHit();
                         const action = badge.action;
+                        if (action === 'reap') {
+                            this.updateScore(score + 1);
+                        }
+
                         hero.interact(action)
                             .then(() => {
                                 grid.beInteracted(action);
@@ -238,6 +246,36 @@ export default class Demo extends Phaser.Scene {
                 }
             }
         }
+    }
+
+    updateScore(newScore) {
+        this.scoreText.setText(newScore + '/' + CARROT_WIN_COUNT);
+
+        let hasMoreUnlock = false;
+        for (let i = ISLAND_UNLOCKS.length - 1; i >= 0; --i) {
+            if (i === 0 || ISLAND_UNLOCKS[i - 1] < newScore) {
+                if (ISLAND_UNLOCKS[i] === newScore) {
+                    // TODO: unlock an island
+
+                    if (i < ISLAND_UNLOCKS.length - 1) {
+                        hasMoreUnlock = true;
+                        this.unlockIsandText.setText(ISLAND_UNLOCKS[i + 1] - newScore + ' MORE');
+                        break;
+                    }
+                }
+                else if (ISLAND_UNLOCKS[i] > newScore) {
+                    hasMoreUnlock = true;
+                    this.unlockIsandText.setText(ISLAND_UNLOCKS[i] - newScore + ' MORE');
+                    break;
+                }
+            }
+        }
+        if (!hasMoreUnlock) {
+            this.unlockIsandHintText.destroy();
+            this.unlockIsandText.destroy();
+        }
+
+        score = newScore;
     }
 }
 

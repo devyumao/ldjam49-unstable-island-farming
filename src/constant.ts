@@ -25,6 +25,9 @@ export const OUT_GAME_UI_DEPTH = 10000;
 
 export const BEAT_BADGE_SPACING = 60;
 
+export const CARROT_WIN_COUNT = 200;
+export const ISLAND_UNLOCKS = [2, 8, 14, 20, 40, 80, 120, 160];
+
 export const ACTION_ICON_FRAME = {
     [ActionType.Plow]: 5,
     [`${ActionType.Sow}-${PlantType.Carrot}`]: 6,
