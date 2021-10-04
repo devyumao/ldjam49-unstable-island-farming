@@ -21,6 +21,7 @@ export default class RhythmBoard {
     stave: Phaser.GameObjects.Image;
     beatBadgeGroup: Phaser.GameObjects.Group;
     hitPointer: Phaser.GameObjects.Image;
+    isStopped: boolean;
 
     constructor(scene: Phaser.Scene, { bps, sequence, delayBeats, music }: IRhythmBoardConfig) {
         this.scene = scene;
@@ -30,6 +31,7 @@ export default class RhythmBoard {
         if (delayBeats != null) {
             this.delayBeats = delayBeats;
         }
+        this.isStopped = false;
     }
 
     start() {
@@ -39,6 +41,7 @@ export default class RhythmBoard {
         this.initBeatBadgeGroup();
         this.initHitPointer();
         this.play();
+        this.isStopped = false;
     }
 
     stop() {
@@ -52,6 +55,22 @@ export default class RhythmBoard {
         this.stave.destroy();
         this.beatBadgeGroup.destroy();
         this.hitPointer.destroy();
+        this.isStopped = true;
+    }
+
+    end() {
+        if (!this.background) {
+            // first call
+            return;
+        }
+        this.music.stop();
+        this.background.setAlpha(0);
+        this.stave.setAlpha(0);
+        this.beatBadgeGroup.setAlpha(0);
+        this.hitPointer.setAlpha(0);
+        this.beatBadgeGroup.children.each((badge: BeatBadge) => {
+            badge.setAlpha(0);
+        });
     }
 
     private initBackground() {
@@ -133,6 +152,9 @@ export default class RhythmBoard {
     }
 
     private createBeat() {
+        if (this.isStopped) {
+            return;
+        }
         const x = this.scene.scale.width * 0.5 + BEAT_BADGE_SPACING * this.delayBeats;
         const unitTime = 6e4 / this.bps * 0.5;
         const v = BEAT_BADGE_SPACING / unitTime;
@@ -171,6 +193,9 @@ export default class RhythmBoard {
     }
 
     private animateBeats() {
+        if (this.isStopped) {
+            return;
+        }
         this.beatBadgeGroup.children.each((badge: BeatBadge) => {
             if (!badge.isBigType() || badge.available) {
                 this.scene.tweens.add({

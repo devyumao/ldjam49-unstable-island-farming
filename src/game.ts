@@ -182,8 +182,9 @@ export default class Demo extends Phaser.Scene {
                     this.carrotParticles.emitters.getAt(0).stop();
                 }, 2000);
                 break;
-            
+
             case 'lose':
+                this.rhythmBoard.end();
                 setTimeout(() => {
                     this.add.image(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 'lose')
                         .setDepth(OUT_GAME_UI_DEPTH)
