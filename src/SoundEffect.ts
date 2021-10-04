@@ -1,8 +1,12 @@
-export type SoundEffectName = 'jump';
+export type SoundEffectName = 'ahhh' | 'applause' | 'error' | 'jump' | 'plow'
+    | 'sow' | 'water' | 'wow' | 'yeah';
 
 export class SoundEffects {
 
-    static names: SoundEffectName[] = [];
+    static names: SoundEffectName[] = [
+        'ahhh', 'applause', 'error', 'jump', 'plow',
+        'sow', 'water', 'wow', 'yeah'
+    ];
 
     protected _sounds: Object;
 
@@ -13,7 +17,7 @@ export class SoundEffects {
         this._sounds = {};
         SoundEffects.names.forEach(name => {
             this._sounds[name] = sound.add(name, {
-                volume: 0.5
+                volume: 0.7
             });
         });
     }

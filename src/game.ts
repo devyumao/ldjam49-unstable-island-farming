@@ -7,6 +7,15 @@ import Hero from './Hero';
 import RhythmBoard from './RhythmBoard';
 import { getDown, getLeft, getRight, getUp } from './utils';
 
+const CANVAS_WIDTH = 1200;
+const CANVAS_HEIGHT = 750;
+
+const COLOR = {
+    PRIMARY: '#ae5e28',
+    PRIMARY_LIGHT: '#eb8b4a',
+    SECONDARY: '#48655a',
+    SECONDARY_LIGHT: '#5e8677'
+};
 
 export default class Demo extends Phaser.Scene {
     map: Phaser.Tilemaps.Tilemap;
@@ -33,9 +42,11 @@ export default class Demo extends Phaser.Scene {
         this.load.spritesheet('stave', 'assets/ui.png', { frameWidth: 8, frameHeight: 8, startFrame: 8, endFrame: 8 });
         this.load.spritesheet('actionIcon', 'assets/ui.png', { frameWidth: 16, frameHeight: 16 });
 
+        this.load.css('headers', 'assets/style.css');
+
         SoundEffects.names
             .forEach(name => {
-                this.load.audio(name, `assets/audio/${name}.wav`);
+                this.load.audio(name, `assets/audio/${name}.mp3`);
             });
     }
 
@@ -53,6 +64,8 @@ export default class Demo extends Phaser.Scene {
         });
 
         this.rhythmBoard = new RhythmBoard(this, { bps: 72, sequence: BEAT_SEQUENCE_000 });
+
+        this.initScore();
 
         this.initInput();
     }
@@ -91,7 +104,8 @@ export default class Demo extends Phaser.Scene {
             [18, 7, 8, 7, 8, 7, 8, 23],
             [24, 13, 14, 13, 14, 13, 14, 29],
             [30, 31, 32, 33, 32, 33, 34, 35],
-            [36, 37, 38, 39, 38, 39, 40, 41]
+            [36, 37, 38, 39, 38, 39, 40, 41],
+            [66, 67, 68, 69, 68, 69, 70, 71]
         ];
         islandTilesData.forEach((row, rowIndex) => {
             row.forEach((value, colIndex) => {
@@ -99,19 +113,78 @@ export default class Demo extends Phaser.Scene {
             });
         });
 
-        layer.randomize(2, 0, 4, 1, [2, 3]);
-        layer.randomize(7, 2, 1, 4, [17, 23]);
-        layer.randomize(2, 7, 4, 1, [32, 33]);
-        layer.randomize(0, 2, 1, 4, [12, 18]);
-        layer.randomize(2, 8, 4, 1, [38, 39]);
+        layer.randomize(2, 0, 4, 1, [2, 3, 50]);
+        layer.randomize(7, 2, 1, 4, [17, 23, 28]);
+        layer.randomize(2, 7, 4, 1, [32, 33, 46]);
+        layer.randomize(0, 2, 1, 4, [12, 18, 22]);
+        layer.randomize(2, 8, 4, 1, [38, 39, 52]);
+        layer.randomize(2, 9, 4, 1, [68, 69]);
     }
 
     initInput() {
         this.cursors = this.input.keyboard.createCursorKeys();
     }
 
+    initScore() {
+        this.add.text(
+            CANVAS_WIDTH - 130,
+            30,
+            '  0/100',
+            {
+                fontSize: '24px',
+                fontFamily: 'pixel',
+                color: COLOR.PRIMARY_LIGHT,
+                stroke: COLOR.PRIMARY,
+                strokeThickness: 5,
+                align: 'left'
+            }
+        );
+        this.add.text(
+            CANVAS_WIDTH - 135,
+            70,
+            '4 MORE',
+            {
+                fontSize: '30px',
+                fontFamily: 'pixel',
+                color: COLOR.SECONDARY,
+                align: 'left'
+            }
+        ).setResolution(4);
+
+        this.add.text(
+            CANVAS_WIDTH - 165,
+            105,
+            'BEFORE NEXT ISLAND',
+            {
+                fontSize: '20px',
+                fontFamily: 'pixel',
+                color: COLOR.SECONDARY_LIGHT,
+                align: 'left'
+            }
+        ).setResolution(4);
+
+        this.add.sprite(
+            CANVAS_WIDTH - 155,
+            22,
+            'carrot',
+            6
+        )
+            .setScale(3);
+    }
+
     update(time, delta) {
         const { input, cursors, hero, rhythmBoard, gridManager } = this;
+
+        if (input.keyboard.checkDown(cursors.shift, 200)) {
+            // TODO: for debug
+            const layer = this.layer;
+            // layer.randomize(2, 0, 4, 1, [2, 3, 50]);
+            // layer.randomize(7, 2, 1, 4, [17, 23, 28]);
+            // layer.randomize(2, 7, 4, 1, [32, 33, 46]);
+            // layer.randomize(0, 2, 1, 4, [12, 18, 22]);
+            // layer.randomize(2, 8, 4, 1, [38, 39, 52]);
+            layer.randomize(2, 9, 4, 1, [68, 69]);
+        }
 
         if (!hero.busy) {
             if (input.keyboard.checkDown(cursors.left, 500)) {
@@ -163,8 +236,8 @@ export default class Demo extends Phaser.Scene {
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     backgroundColor: '#000000',
-    width: 1200,
-    height: 750,
+    width: CANVAS_WIDTH,
+    height: CANVAS_HEIGHT,
     pixelArt: true,
     scale: {
         mode: Phaser.Scale.ScaleModes.FIT,

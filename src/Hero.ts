@@ -106,18 +106,22 @@ export default class Hero extends Phaser.GameObjects.Sprite {
     }
 
     private plow() {
+        this.soundEffects.play('plow');
         return this.do({ key: 'plow', delay: 120 });
     }
 
     private water() {
+        this.soundEffects.play('water');
         return this.do({ key: 'water', delay: 120 });
     }
 
     private sow() {
+        this.soundEffects.play('sow');
         return this.do({ key: 'sow', event: Phaser.Animations.Events.ANIMATION_COMPLETE });
     }
 
     private reap() {
+        this.soundEffects.play('yeah');
         return this.do({ key: 'reap' });
     }
 
