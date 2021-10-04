@@ -113,7 +113,7 @@ export default class Demo extends Phaser.Scene {
 
         this.initCamera();
     }
-    
+
     initCamera() {
         this.islandManager.beFocuesdOn(this.cameras.main, { x: 0, y: 0 });
     }
@@ -185,7 +185,7 @@ export default class Demo extends Phaser.Scene {
 
     initScore() {
         this.scoreText = this.add.text(
-            CANVAS_WIDTH - 130,
+            CANVAS_WIDTH - 110,
             30,
             '0/' + CARROT_WIN_COUNT,
             {
@@ -229,7 +229,7 @@ export default class Demo extends Phaser.Scene {
             .setScrollFactor(0);
 
         this.add.sprite(
-            CANVAS_WIDTH - 155,
+            CANVAS_WIDTH - 135,
             22,
             'carrot',
             6
@@ -311,6 +311,13 @@ export default class Demo extends Phaser.Scene {
 
     updateScore(newScore) {
         this.scoreText.setText(newScore + '/' + CARROT_WIN_COUNT);
+
+        if (newScore === CARROT_WIN_COUNT) {
+            this.setGameState('win');
+            this.unlockIsandHintText.destroy();
+            this.unlockIsandText.destroy();
+            return;
+        }
 
         let hasMoreUnlock = false;
         for (let i = ISLAND_UNLOCKS.length - 1; i >= 0; --i) {
