@@ -23,6 +23,8 @@ const PLAT_AGE_DURATION = {
     [PlantType.Carrot]: 6000
 };
 
+const PLANT_UP_HEIGHT = 130;
+
 export default class Grid {
     scene: Phaser.Scene;
     islandCoord: ICoord;
@@ -127,10 +129,10 @@ export default class Grid {
             tweens: [
                 {
                     targets: this.plant,
-                    duration: 80,
+                    duration: 500,
                     props: {
                         alpha: 1,
-                        y: this.plant.y - 50
+                        y: this.plant.y - PLANT_UP_HEIGHT
                     },
                     onStart: () => {
                         this.plant.setAlpha(0);
@@ -139,14 +141,14 @@ export default class Grid {
                 },
                 {
                     targets: this.plant,
-                    duration: 80,
+                    duration: 1000,
                     delay: 400,
                     props: {
                         alpha: 0
                     },
                     onComplete: () => {
                         this.setSoilState(SoilState.Plowed);
-                        this.plant.y += 50;
+                        this.plant.y += PLANT_UP_HEIGHT;
                         this.plantAge = -1;
                     },
                     callbackScope: this
