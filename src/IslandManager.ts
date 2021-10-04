@@ -200,7 +200,7 @@ export default class IslandManager {
 
     checkAllBroken() {
         return Object.values(this.islands)
-            .every(island => island.getData('broken') >= 4);
+            .every(island => !island.visible);
     }
 }
 

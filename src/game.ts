@@ -184,10 +184,14 @@ export default class Demo extends Phaser.Scene {
                 break;
             
             case 'lose':
-                this.add.image(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 'lose')
-                    .setDepth(OUT_GAME_UI_DEPTH)
-                    .setScrollFactor(0);
-                this.rhythmBoard.music.stop();
+                setTimeout(() => {
+                    this.add.image(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 'lose')
+                        .setDepth(OUT_GAME_UI_DEPTH)
+                        .setScrollFactor(0);
+                }, 2000);
+                this.unlockIsandHintText.destroy();
+                this.unlockIsandText.destroy();
+                break;
 
         }
         gameState = state;
@@ -251,10 +255,6 @@ export default class Demo extends Phaser.Scene {
     update(time, delta) {
         const { input, cursors, hero, rhythmBoard, gridManager, islandManager } = this;
 
-        if (islandManager.checkAllBroken()) {
-
-        }
-
         if (!hero.busy) {
             let direction;
             const originIslandCoord = { ...hero.islandCoord };
@@ -296,9 +296,10 @@ export default class Demo extends Phaser.Scene {
                     this.setGameState('in_game');
                     return;
                 }
-                if (gameState === 'win') {
-                    this.setGameState('before_game');
-                    this.scene.restart();
+                if (gameState === 'win' || gameState === 'lose') {
+                    // this.setGameState('before_game');
+                    // this.scene.restart();
+                    window.location.reload();
                     return;
                 }
                 rhythmBoard.animateHitPoint();
@@ -318,6 +319,10 @@ export default class Demo extends Phaser.Scene {
                     } else {
                         this.cameras.main.shake(200, 0.02);
                         islandManager.updateBroken(grid.islandCoord);
+                        if (islandManager.checkAllBroken()) {
+                            this.setGameState('lose');
+                            return;
+                        }
                     }
                 }
             }
@@ -329,8 +334,6 @@ export default class Demo extends Phaser.Scene {
 
         if (newScore === CARROT_WIN_COUNT) {
             this.setGameState('win');
-            this.unlockIsandHintText.destroy();
-            this.unlockIsandText.destroy();
             return;
         }
 
